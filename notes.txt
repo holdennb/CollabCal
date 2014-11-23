@@ -1,0 +1,22 @@
+Stored on server:
+-events that have: event data, list of groups
+-groups that have: list of users
+-users that have: list of events [with privileges]
+
+Collaboration:
+-ajax long poll/timer for updates on events that user has access to
+-when you submit an edit on an event, if the edited field been updated, disallow.
+
+Rendering:
+-param to specify full page or specific event
+-kind of DSL so that we don’t have to write HTML manually
+-check user’s session in server’s session->user map
+
+Authentication:
+-user filename is username
+-password is first line
+-once logged in (pw correct), set a session cookie (2 hoursish)
+
+
+
+—editing form underneath calendar at first, hidden event id form item populated by JS based on selected event
