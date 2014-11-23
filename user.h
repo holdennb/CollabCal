@@ -6,7 +6,7 @@
 class User{
  private:
   /* The next user ID to use. */
-  static long int ID_COUNTER = 0;
+  static long int ID_COUNTER;
   /* The id of this user. */
   const long int id;
   /*
@@ -20,9 +20,18 @@ class User{
     and the second element is whether or not the user
     has permission to change the event.
    */
-  std::list<pair<long int,bool>> eventsInfo;
+  std::list<std::pair<long int, bool>> eventsInfo;
+  /*
+     Create a user that can not view any events,
+     and has the given password,
+     using the existing given id.
+  */
+  User(const std::string &password, const long id);
 
  public:
+  /* Create a user that can not view any events,
+     and has the given password.*/
+  User(const std::string &password);
   /* Get the unique identifier of the user. */
   long int getID();
   /*
@@ -41,10 +50,11 @@ class User{
   bool setPassword(const std::string &oldPassword,
 		   const std::string &newPassword);
   /*
-    Returns a list of event ids, where each id cooresponds to
-    an event that this user can view.
+    Returns a pointer to a list of event ids, where each id cooresponds to
+    an event that this user can view. The client is responsible for
+    freeing the memory used by this list.
    */
-  std::list<long> getEventIDs();
+  std::list<long>* getEventIDs();
   /* Mark an existing event as being viewable by this user. */
   void addEvent(const long eventID, const bool canWrite);
   /*
@@ -66,6 +76,11 @@ class User{
     Write the event information a file with the given filename,
     overwriting any previous data. Returns true on success,
     false otherwise.
+    The format of a user file is as follows:
+    The first line is the users ID,
+    The second line is the users password,
+    Every subsequent line has an event id optionally followed by the 'w'
+    character, if the user has write permissions for that event.
    */
   bool writeToFile(const std::string &filename);
   /*
@@ -73,7 +88,8 @@ class User{
     parsing it into a User object, and returning a pointer to the User.
     Returns nullptr if the file could not be found, or
     could not be parsed.
+    The client is responsible for freeing the result.
    */
   static User* readFromFile(const std::string &filename);
-}
+};
 #endif
