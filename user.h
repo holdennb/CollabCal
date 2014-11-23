@@ -29,7 +29,7 @@ class User{
     Returns true if the given string matches the users password,
     false otherwise.
    */
-  bool hasPassword(std::string password);
+  bool hasPassword(const std::string &password);
   /*
     Set the users password. The first argument is the users
     previous password, the second is the desired new password.
@@ -38,41 +38,42 @@ class User{
     Otherwise, the password is set to the second argument,
     and true is returned.
    */
-  bool setPassword(std::string oldPassword, std::string newPassword);
+  bool setPassword(const std::string &oldPassword,
+		   const std::string &newPassword);
   /*
     Returns a list of event ids, where each id cooresponds to
     an event that this user can view.
    */
   std::list<long> getEventIDs();
   /* Mark an existing event as being viewable by this user. */
-  void addEvent(long eventID, bool canWrite);
+  void addEvent(const long eventID, const bool canWrite);
   /*
     Mark an event currently viewable by the user as no longer
     viewable by the user.
    */
-  void removeEvent(long eventID);
+  void removeEvent(const long eventID);
   /*
     Set whether or not the user can modify the event cooresponding
     to the given event ID.
   */
-  void setCanWrite(long eventID, bool canWrite);
+  void setCanWrite(const long eventID, const bool canWrite);
   /*
     Returns whether or not the user can modify the event
     cooresponding to the given event ID.
    */
-  bool canWrite(long eventID);
+  bool canWrite(const long eventID);
   /*
     Write the event information a file with the given filename,
     overwriting any previous data. Returns true on success,
     false otherwise.
    */
-  bool writeToFile(std::string filename);
+  bool writeToFile(const std::string &filename);
   /*
     Read the data from the file with the given filename,
     parsing it into a User object, and returning a pointer to the User.
     Returns nullptr if the file could not be found, or
     could not be parsed.
    */
-  static User* readFromFile(std::string filename);
+  static User* readFromFile(const std::string &filename);
 }
 #endif
