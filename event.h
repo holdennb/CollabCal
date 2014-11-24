@@ -6,9 +6,9 @@
 class Event{
  private:
   /* The ID of the next created event. */
-  static long int ID_COUNTER = 0;
+  static long ID_COUNTER = 0;
   /* The unique identifier for this event. */
-  long int id;
+  long id;
   /* The public name of the event. */
   std::string name;
   /* The time at which the event occurs. */
@@ -21,7 +21,7 @@ class Event{
   /* Get the time at which the event is occurring. */
   time_t getTime();
   /* Get the uniqe identifier for this event. */
-  long int getID();
+  long getID();
   /* Change the time at which this event is occurring. */
   void reschedule(time_t newTime);
   /* Change the name of the event. */
