@@ -19,16 +19,16 @@ class Group{
   Group(const std::list<long> &initialUsers = std::list<long>());
 
   /* Recreate an existing group with a specific ID. */
-  Group(const std::list<long> &initialUsers = std::list<long>(),
-	const long id);
+  Group(const long id,
+	const std::list<long> &initialUsers = std::list<long>());
   
   /* Get the unique identifier of this group. */
-  long getID();
+  const long getID();
   /*
      Get a list of user IDs cooresponding to the users
      that belong to this group.
   */
-  std::list<long> getUserIDs();
+  const std::list<long> getUserIDs();
   /*
      Add the existing user with the given ID to the group.
      Returns false if the user is already in the group,
@@ -44,12 +44,16 @@ class Group{
   /*
      Write the group to a file with the given filename,
      overwriting any data that was previously in the file.
+     A group file consists of a line containing the group id,
+     followed by a line for each user in the group containing
+     the users id.
   */
-  bool writeToFile(const std::string &filename);
+  const bool writeToFile(const std::string &filename);
   /*
      Read out a Group object from the file with the given
      filename, returning a pointer to that object.
      Returns nullptr if the file does not exist, or could not be read.
+     The client is responsible for deleting the result.
   */
   static Group* readFromFile(const std::string &filename);
 };
