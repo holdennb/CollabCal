@@ -33,12 +33,12 @@ class User{
      and has the given password.*/
   User(const std::string &password);
   /* Get the unique identifier of the user. */
-  long int getID();
+  const long int getID();
   /*
     Returns true if the given string matches the users password,
     false otherwise.
    */
-  bool hasPassword(const std::string &password);
+  const bool hasPassword(const std::string &password);
   /*
     Set the users password. The first argument is the users
     previous password, the second is the desired new password.
@@ -54,7 +54,7 @@ class User{
     an event that this user can view. The client is responsible for
     freeing the memory used by this list.
    */
-  std::list<long>* getEventIDs();
+  const std::list<long>* getEventIDs();
   /* Mark an existing event as being viewable by this user. */
   void addEvent(const long eventID, const bool canWrite);
   /*
@@ -71,7 +71,7 @@ class User{
     Returns whether or not the user can modify the event
     cooresponding to the given event ID.
    */
-  bool canWrite(const long eventID);
+  const bool canWrite(const long eventID);
   /*
     Write the event information a file with the given filename,
     overwriting any previous data. Returns true on success,
@@ -82,7 +82,7 @@ class User{
     Every subsequent line has an event id optionally followed by the 'w'
     character, if the user has write permissions for that event.
    */
-  bool writeToFile(const std::string &filename);
+  const bool writeToFile(const std::string &filename);
   /*
     Read the data from the file with the given filename,
     parsing it into a User object, and returning a pointer to the User.
