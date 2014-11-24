@@ -1,5 +1,4 @@
 #include "user.h"
-#include <iostream>
 #include <fstream>
 #include <algorithm>
 #include <stdexcept>
