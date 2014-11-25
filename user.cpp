@@ -5,7 +5,7 @@
 
 using namespace std;
 
-long int User::ID_COUNTER = 0;
+long User::ID_COUNTER = 0;
 
 User::User(const string &initialPassword) :
   User(initialPassword,ID_COUNTER++){
@@ -17,7 +17,7 @@ User::User(const string &initialPassword, const long existingID) :
   eventsInfo(list<pair<long,bool>>()){
 }
 
-const long int User::getID(){
+const long User::getID(){
   return id;
 }
 
