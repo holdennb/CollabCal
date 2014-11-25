@@ -45,7 +45,14 @@ long long login(string username, string password){
   while(true){
     sessionID = generator();
     for(auto i = sessionMap.begin(); i != sessionMap.end(); ++i){
-      
+      if (i->first == sessionID)
+	continue;
     }
+    break;
   }
+
+  sessionMap[sessionID] = userID;
+  return sessionID;
+}
+
 }
