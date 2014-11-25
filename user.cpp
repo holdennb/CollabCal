@@ -138,6 +138,7 @@ User* User::readFromFile(const string &filename){
     }
     result->addEvent(eventID,true);
   }
+  file.close();
   
   return result;
 }
