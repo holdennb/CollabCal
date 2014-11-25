@@ -50,6 +50,12 @@ class Group{
      true otherwise.
   */
   bool removeUser(const long userID);
+  /* Add an event to this group. This does NOT invite the users,
+     you have to do that seperately. */
+  void addEvent(const long eventID);
+  /* Remove an event from this group. This does NOT uninvite the users,
+     you have to do that separately. */
+  void removeEvent(const long eventID);
   /*
      Write the group to a file with the given filename,
      overwriting any data that was previously in the file.
