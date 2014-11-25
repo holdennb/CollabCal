@@ -7,37 +7,47 @@ using namespace std;
 
 long Group::ID_COUNTER = 0;
 
-Group::Group(const std::list<long> &initialUsers) :
-  id(ID_COUNTER++), users(initialUsers){}
+Group::Group(const std::list<pair<long,bool>> &initialUsers) :
+  id(ID_COUNTER++), userInfos(initialUsers){}
 
 Group::Group(const long id,
-	     const std::list<long> &initialUsers) :
-  id(id), users(initialUsers){}
+	     const std::list<pair<long,bool>> &initialUsers) :
+  id(id), userInfos(initialUsers){}
 
 const long Group::getID(){ return id; }
 
-const list<long> Group::getUserIDs(){ return users; }
+const list<long>* Group::getUserIDs(){
+  auto result = new list<long>();
+  transform(userInfos.begin(), userInfos.end(), result->begin(),
+	    [](pair<long,bool> userInfo){ return userInfo.first; });
+  return result;
+}
 
-template <typename T> bool listContains(const list<T> &haystack, const T &needle){
-  for(auto i = haystack.begin(); i != haystack.end(); ++i){
-    if (*i == needle)
-      return true;
+const bool Group::userCanWrite(const long userID){
+  for(auto i = userInfos.begin(); i != userInfos.end(); ++i){
+    if (i->first == userID)
+      return i->second;
   }
   return false;
 }
 
-bool Group::addUser(const long userID){
-  if (listContains<long>(users, userID))
-    return false;
-  users.push_front(userID);
+bool Group::addUser(const long userID, const bool canWrite){
+  for(auto i = userInfos.begin(); i != userInfos.end(); ++i){
+    if(i->first == userID)
+      return false;
+  }
+  userInfos.push_front(pair<long,bool>(userID, canWrite));
   return true;
 }
 
 bool Group::removeUser(const long userID){
-  if (!listContains<long>(users, userID))
-    return false;
-  users.remove(userID);
-  return true;
+  for(auto i = userInfos.begin(); i != userInfos.end(); ++i){
+    if(i->first == userID){
+      userInfos.remove(*i);
+      return true;
+    }
+  }
+  return false;
 }
 
 const bool Group::writeToFile(const string &filename){
@@ -46,9 +56,12 @@ const bool Group::writeToFile(const string &filename){
   if(file.fail())
     return false;
   file << id << endl;
-  for_each(users.begin(), users.end(),
-	   [&file](long userID){
-	     file << userID << endl;
+  for_each(userInfos.begin(), userInfos.end(),
+	   [&file](pair<long,bool> userInfo){
+	     file << userInfo.first;
+	     if (userInfo.second)
+	       file << " w";
+	     file << endl;
 	   });
   file.close();
   return true;
@@ -58,11 +71,10 @@ Group* Group::readFromFile(const string &filename){
   ifstream file;
 
   string groupIdLine;
-  string userIdLine;
+  string userInfoLine;
 
   long id;
-  list<long> userIDs;
-  Group* result;
+  list<pair<long,bool>> userInfos;
 
   // Open the file
   file.open(filename);
@@ -80,15 +92,29 @@ Group* Group::readFromFile(const string &filename){
     return nullptr;
   }
 
-  userIDs = list<long>();
-  while(getline(file, userIdLine)){
+  // Read the users IDs from the group file.
+  userInfos = list<pair<long,bool>>();
+  while(getline(file, userInfoLine)){
+    size_t endOfID = userInfoLine.find(' ');
+    long userID;
+    string userIDstring;
+    bool canWrite;
+    if(endOfID == string::npos){
+      userIDstring = userInfoLine;
+      canWrite = false;
+    } else {
+      userIDstring = userInfoLine.substr(0,endOfID);
+      canWrite = true;
+    }
     try{
-      userIDs.push_front(stol(userIdLine));
+      userID = stol(userIDstring);
     } catch(invalid_argument e){
       return nullptr;
     } catch(out_of_range e){
       return nullptr;
     }
+    userInfos.push_front(pair<long,bool>(userID, canWrite));
   }
-  return new Group(id, userIDs);
+  file.close();
+  return new Group(id, userInfos);
 }
