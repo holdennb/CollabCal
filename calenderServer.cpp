@@ -55,4 +55,11 @@ long long login(string username, string password){
   return sessionID;
 }
 
+bool userChangePassword(long userID, const string &oldPassword, const string &newPassword){
+  User* user = lookupUser(userID);
+  if (user == nullptr)
+    return false;
+  return user->setPassword(oldPassword, newPassword)
+}
+
 }
