@@ -71,4 +71,12 @@ bool deleteUser(long userID){
   return true;
 }
 
+void makeGroup(long userID, string groupName){
+  Group newGroup(list<pair<long,bool> >(pair<long,bool>(userID, true)));
+  string groupFilename = groupDir.append(groupName);
+  if(!Group.writeToFile(groupFilename)){
+    cerr << "could not create group " << groupName << ": problem writing group file!" << endl;
+    return;
+  }
+  groupFileMap[newGroup.getID()] = groupFilename;
 }
