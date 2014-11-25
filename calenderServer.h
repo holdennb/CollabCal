@@ -33,8 +33,7 @@ bool userChangePassword(long userID, const std::string &oldPassword,
 			const std::string &newPassword);
 
 /* Remove a user from the server. Returns true upon sucess,
-   false if we couldn't find the user, or there was a weird
-   file permission thing.*/
+   false if we couldn't find the user. */
 bool deleteUser(long userID);
 
 /* Create a new user group, with the given name.
