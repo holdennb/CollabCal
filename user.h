@@ -6,9 +6,9 @@
 class User{
  private:
   /* The next user ID to use. */
-  static long int ID_COUNTER;
+  static long ID_COUNTER;
   /* The id of this user. */
-  const long int id;
+  const long id;
   /*
     The users password. There is no way to get
     this value out of the class, for security reasons.
@@ -20,7 +20,7 @@ class User{
     and the second element is whether or not the user
     has permission to change the event.
    */
-  std::list<std::pair<long int, bool>> eventsInfo;
+  std::list<std::pair<long, bool> > eventsInfo;
   /*
      Create a user that can not view any events,
      and has the given password,
@@ -33,7 +33,7 @@ class User{
      and has the given password.*/
   User(const std::string &password);
   /* Get the unique identifier of the user. */
-  const long int getID();
+  const long getID();
   /*
     Returns true if the given string matches the users password,
     false otherwise.
