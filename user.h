@@ -19,6 +19,9 @@ class User{
     The first element in the pair is the id of the event,
     and the second element is whether or not the user
     has permission to change the event.
+    There may be multiple entries in the list which
+    contain the same event ID, in which case the first
+    one takes precedence.
    */
   std::list<std::pair<long, bool> > eventsInfo;
   /*
@@ -69,7 +72,8 @@ class User{
   void setCanWrite(const long eventID, const bool canWrite);
   /*
     Returns whether or not the user can modify the event
-    cooresponding to the given event ID.
+    cooresponding to the given event ID. If the user is
+    not invited to the event, returns false.
    */
   const bool canWrite(const long eventID);
   /*
