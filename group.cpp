@@ -16,6 +16,8 @@ Group::Group(const long id,
 
 const long Group::getID(){ return id; }
 
+const string getName(){ return name;}
+
 const list<long>* Group::getUserIDs(){
   auto result = new list<long>();
   transform(userInfos.begin(), userInfos.end(), result->begin(),
@@ -30,6 +32,8 @@ const bool Group::userCanWrite(const long userID){
   }
   return false;
 }
+
+void Group::rename(const string &newName){ name = newName; }
 
 bool Group::addUser(const long userID, const bool canWrite){
   for(auto i = userInfos.begin(); i != userInfos.end(); ++i){
@@ -48,6 +52,14 @@ bool Group::removeUser(const long userID){
     }
   }
   return false;
+}
+
+void Group::addEvent(const long eventID){
+  events.push_front(eventID);
+}
+
+void Group::removeEvent(const long eventID){
+  events.remove(eventID);
 }
 
 const bool Group::writeToFile(const string &filename){
