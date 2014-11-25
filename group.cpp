@@ -54,6 +54,14 @@ bool Group::removeUser(const long userID){
   return false;
 }
 
+void Group::addEvent(const long eventID){
+  events.push_front(eventID);
+}
+
+void Group::removeEvent(const long eventID){
+  events.remove(eventID);
+}
+
 const bool Group::writeToFile(const string &filename){
   ofstream file;
   file.open(filename);
