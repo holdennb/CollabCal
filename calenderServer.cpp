@@ -3,6 +3,7 @@
 #include <map>
 #include <chrono>
 #include <random>
+#include <cstdio>
 
 using namespace std;
 
@@ -60,6 +61,14 @@ bool userChangePassword(long userID, const string &oldPassword, const string &ne
   if (user == nullptr)
     return false;
   return user->setPassword(oldPassword, newPassword)
+}
+
+bool deleteUser(long userID){
+  auto it = userFileMap.find(userID);
+  if (it == map::end)
+    return false;
+  userFileMap.remove(*it);
+  return true;
 }
 
 }
