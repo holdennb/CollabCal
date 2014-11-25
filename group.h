@@ -12,29 +12,32 @@ class Group{
   static long ID_COUNTER;
   /* The id of this group. */
   const long id;
-  /* The users that belong to this group. */
-  std::list<long> users;
- public:
-  /* Create a group with some initial users in it. */
-  Group(const std::list<long> &initialUsers = std::list<long>());
-
+  /* The users that belong to this group, along with whether or not they can modify the group. */
+  std::list<std::pair<long,bool> > userInfos;
+  /* The events that are in this group. */
+  std::list<long> events;
   /* Recreate an existing group with a specific ID. */
   Group(const long id,
-	const std::list<long> &initialUsers = std::list<long>());
-  
+	const std::list<std::pair<long,bool> > &initialUsers = std::list<std::pair<long,bool> >());
+ public:
+  /* Create a group with some initial users in it. */
+  Group(const std::list<std::pair<long,bool> > &initialUsers = std::list<std::pair<long,bool> >());
+
   /* Get the unique identifier of this group. */
   const long getID();
   /*
      Get a list of user IDs cooresponding to the users
      that belong to this group.
   */
-  const std::list<long> getUserIDs();
+  const std::list<long>* getUserIDs();
+  /* Whether or not the user can modify this group. */
+  const bool userCanWrite(const long userID);
   /*
      Add the existing user with the given ID to the group.
      Returns false if the user is already in the group,
      true otherwise.
   */
-  bool addUser(const long userID);
+  bool addUser(const long userID, const bool canWrite=false);
   /* 
      Remove the user with the given ID from the group.
      returns false if the user is not already in the group,
