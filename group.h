@@ -12,6 +12,8 @@ class Group{
   static long ID_COUNTER;
   /* The id of this group. */
   const long id;
+  /* The name of this group. */
+  std::string name;
   /* The users that belong to this group, along with whether or not they can modify the group. */
   std::list<std::pair<long,bool> > userInfos;
   /* The events that are in this group. */
@@ -25,6 +27,8 @@ class Group{
 
   /* Get the unique identifier of this group. */
   const long getID();
+  /* Get the current name of this group. */
+  const std::string getName();
   /*
      Get a list of user IDs cooresponding to the users
      that belong to this group.
@@ -32,6 +36,8 @@ class Group{
   const std::list<long>* getUserIDs();
   /* Whether or not the user can modify this group. */
   const bool userCanWrite(const long userID);
+  /* Change the name of the group. */
+  void rename(const std::string &newName);
   /*
      Add the existing user with the given ID to the group.
      Returns false if the user is already in the group,
