@@ -72,7 +72,7 @@ long makeEvent(const long userID, const std::string &eventName, const time_t eve
    users are invited. Returns the event ID on success. Might do
    nothing and return -1 if the user who is trying to create the event
    is not part of the group they are trying to create it for. */
-long makeEvent(const long userID, const std::string &eventName, const time_t eventTime, const long groupID
+long makeEvent(const long userID, const std::string &eventName, const time_t eventTime, const long groupID,
 	       bool groupWritable=false);
 
 /* Change the name of an event. */

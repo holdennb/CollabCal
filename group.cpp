@@ -33,7 +33,7 @@ const bool Group::userCanWrite(const long userID){
   return false;
 }
 
-const list<long>* Group::getEventIDs() { return new list<long>(events); }
+list<long>* const Group::getEventIDs() { return new list<long>(events); }
 
 void Group::rename(const string &newName){ name = newName; }
 

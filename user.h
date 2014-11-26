@@ -57,7 +57,7 @@ class User{
     an event that this user can view. The client is responsible for
     freeing the memory used by this list.
    */
-  const std::list<long>* getEventIDs();
+  std::list<long>* const getEventIDs();
   /* Mark an existing event as being viewable by this user. */
   void addEvent(const long eventID, const bool canWrite);
   /*

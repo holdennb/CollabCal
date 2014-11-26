@@ -38,7 +38,7 @@ class Group{
   const bool userCanWrite(const long userID);
   /* Get a list of event IDs cooresponding to the events that are part
      of this group. */
-  const std::list<long>* getEventIDs();
+  std::list<long>* const getEventIDs();
   /* Change the name of the group. */
   void rename(const std::string &newName);
   /*

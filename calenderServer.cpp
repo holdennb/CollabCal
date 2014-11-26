@@ -4,6 +4,7 @@
 #include <chrono>
 #include <random>
 #include <cstdio>
+#include <algorithm>
 
 using namespace std;
 
@@ -22,9 +23,9 @@ long makeUser(const string &username, const string &password){
   User newUser(password);
   long userID = newUser.getID();
   string userFileName = userDir.append(username);
-  if(!User.writeToFile(userFileName)){
+  if(!newUser.writeToFile(userFileName)){
     cerr << "could not create user " << username << ": problem writing user file!" << endl;
-    return;
+    return -1;
   }
   userFileMap[userID] = userFileName;
   return userID;
@@ -39,11 +40,11 @@ long long login(const string &username, const string &password){
     cerr << "was given a bad userID by function userIdByName!" << endl;
     return -1;
   }
-  if(!user.hasPassword(password))
+  if(!user->hasPassword(password))
     return -1;
 
   unsigned seed = chrono::system_clock::now().time_since_epoch().count();
-  linear_congruential_engine<unsigned long long, 16807, 0, 18446744073709551616> generator(seed);
+  linear_congruential_engine<unsigned long long, 16807, 0, 18446744073709551616ull> generator(seed);
   long long sessionID;
   while(true){
     sessionID = generator();
@@ -62,25 +63,25 @@ bool userChangePassword(const long userID, const string &oldPassword, const stri
   User* user = lookupUser(userID);
   if (user == nullptr)
     return false;
-  return user->setPassword(oldPassword, newPassword)
+  return user->setPassword(oldPassword, newPassword);
 }
 
 bool deleteUser(const long userID){
   auto it = userFileMap.find(userID);
-  if (it == map::end)
+  if (it == userFileMap.end())
     return false;
-  remove(it->second);
+  remove(it->second.c_str());
   userFileMap.erase(it);
   return true;
 }
 
 long makeGroup(const long userID, const string &groupName){
-  Group newGroup(list<pair<long,bool> >(pair<long,bool>(userID, true)));
+  Group newGroup(list<pair<long,bool> >(1,pair<long,bool>(userID, true)));
   long groupID = newGroup.getID();
   string groupFilename = groupDir.append(groupName);
-  if(!Group.writeToFile(groupFilename)){
+  if(!newGroup.writeToFile(groupFilename)){
     cerr << "could not create group " << groupName << ": problem writing group file!" << endl;
-    return;
+    return -1;
   }
   groupFileMap[groupID] = groupFilename;
   return groupID;
@@ -89,7 +90,7 @@ long makeGroup(const long userID, const string &groupName){
 void renameGroup(const long userID, const long groupID, const string &newName){
   Group* group = lookupGroup(groupID);
   if (group == nullptr || !group->userCanWrite(userID))
-    return false;
+    return;
   group->rename(newName);
 }
 
@@ -103,11 +104,12 @@ bool addToGroup(const long adderID, const long addedID, const long groupID, cons
     return false;
   if (!group->addUser(addedID, admin))
     return false;
-  list<long> groupEvents = group->getEventIDs();
-  for_each(groupEvents.begin(), groupEvents.end(),
+  list<long>* groupEvents = group->getEventIDs();
+  for_each(groupEvents->begin(), groupEvents->end(),
 	   [added](long eventID){
-	     added->addEvent(eventID);
+	     added->addEvent(eventID, false);
 	   });
+  delete groupEvents;
   return true;
 }
 
@@ -116,7 +118,7 @@ bool removeFromGroup(const long removerID, const long removedID, const long grou
   if (group == nullptr) return false;
   if (!group->userCanWrite(removerID))
     return false;
-  return group.removeUser(removedID);
+  return group->removeUser(removedID);
 }
 
 bool deleteGroup(const long userID, const long groupID){
@@ -125,8 +127,8 @@ bool deleteGroup(const long userID, const long groupID){
   if (!group->userCanWrite(userID))
     return false;
   auto it = groupFileMap.find(userID);
-  if (it == map::end) return false;
-  remove(it->second);
+  if (it == groupFileMap.end()) return false;
+  remove(it->second.c_str());
   groupFileMap.erase(it);
   return true;
 }
@@ -137,11 +139,11 @@ long makeEvent(const long userID, const string &eventName, const time_t eventTim
   string eventFilename = eventDir.append(eventName);
   
   User* user = lookupUser(userID);
-  if (user == nullptr) return;
+  if (user == nullptr) return -1;
   
   if(!newEvent.writeToFile(eventFilename)){
     cerr << "could not create event " << eventName << ": problem writing group file!" << endl;
-    return;
+    return -1;
   }
   eventFileMap[eventID] = eventFilename;
   user->addEvent(eventID, true);
@@ -153,7 +155,7 @@ void renameEvent(const long userID, const long eventID, const std::string &newNa
   User* user = lookupUser(userID);
   if (event == nullptr || user == nullptr || !user->canWrite(eventID))
     return;
-  event.rename(newName);
+  event->rename(newName);
 }
 
 void rescheduleEvent(const long userID, const long eventID, const time_t newTime){
@@ -161,20 +163,20 @@ void rescheduleEvent(const long userID, const long eventID, const time_t newTime
   User* user = lookupUser(userID);
   if (event == nullptr || user == nullptr || !user->canWrite(eventID))
     return;
-  event.reschedule(newTime);
+  event->reschedule(newTime);
 }
 
 long makeEvent(const long userID, const string &eventName, const time_t eventTime, const long groupID,
 	       bool groupWritable){
   Group* group = lookupGroup(groupID);
-  if (group == nullptr) return false;
+  if (group == nullptr) return -1;
   long eventID = makeEvent(userID, eventName, eventTime);
   group->addEvent(eventID);
   auto userIDs = group->getUserIDs();
-  for_each(userIDs.begin(), userIDs.end(),
-	   [eventID](long userID){
+  for_each(userIDs->begin(), userIDs->end(),
+	   [eventID, groupWritable](long userID){
 	     User* user = lookupUser(userID);
-	     user.addEvent(eventID,groupWritable);
+	     user->addEvent(eventID,groupWritable);
 	   });
   delete userIDs;
   return eventID;
@@ -198,10 +200,10 @@ bool deleteEvent(const long userID, const long eventID){
   Event* event = lookupEvent(eventID);
   if(event == nullptr) return false;
   auto it = eventFileMap.find(eventID);
-  if(it == map::end)
+  if(it == eventFileMap.end())
     return false;
-  remove(it->second);
-  eventFileMape.erase(it);
+  remove(it->second.c_str());
+  eventFileMap.erase(it);
   return true;
 }
 
@@ -212,7 +214,7 @@ list<long>* getEvents(const long userID){
 
 long userIDByName(const string &username){
   for(auto it = userFileMap.begin(); it != userFileMap.end(); ++it){
-    if (it->second.substring(userDir.length()) == username)
+    if (it->second.substr(userDir.length()) == username)
       return it->first;
   }
   return -1;
@@ -222,8 +224,8 @@ long groupIdByName(const string &name){
   Group* checkingGroup;
   for(auto it = groupFileMap.begin(); it != groupFileMap.end(); ++it){
     checkingGroup = lookupGroup(it->first);
-    if (checkingGroup.getName() == name)
-      return checkingGroup.getID();
+    if (checkingGroup->getName() == name)
+      return checkingGroup->getID();
   }
   return -1;
 }
@@ -232,8 +234,8 @@ long eventIdByName(const string &name){
   Event* checkingEvent;
   for(auto it = eventFileMap.begin(); it != groupFileMap.end(); ++it){
     checkingEvent = lookupEvent(it->first);
-    if (checkingEvent.getName() == name)
-      return checkingGroup.getID();
+    if (checkingEvent->getName() == name)
+      return checkingEvent->getID();
   }
   return -1;
 }
@@ -241,11 +243,11 @@ long eventIdByName(const string &name){
 long eventIdByName(const long userID, const string &name){
   Event* checkingEvent;
   User* user = lookupUser(userID);
-  list<long> eventIDs = user->getEventIDs();
-  for(auto it = eventIDs.begin(); it != eventIDs.end(); ++it){
+  list<long>* eventIDs = user->getEventIDs();
+  for(auto it = eventIDs->begin(); it != eventIDs->end(); ++it){
     checkingEvent = lookupEvent(*it);
-    if (checkingEvent.getName() == name)
-      return checkingEvent.getID();
+    if (checkingEvent->getName() == name)
+      return checkingEvent->getID();
   }
   return -1;
 }
@@ -267,7 +269,7 @@ User* lookupUser(const long userID){
   // First thing, we check if we already have this user object cached.
   auto cacheIt = userCache.find(userID);
   // If we do, we can just return the cached version, and we're done.
-  if (cacheIt != map::end)
+  if (cacheIt != userCache.end())
     return cacheIt->second.first;
 
   // If not, we want to first make room in the cache for a new object,
@@ -284,7 +286,7 @@ User* lookupUser(const long userID){
       // that means that that object was deleted already, so there's
       // no need to try to save it's state to a file.
       auto mapIt = userFileMap.find(it->first);
-      if (mapIt != map::end)
+      if (mapIt != userFileMap.end())
 	// If we do have a file mapping, we want to write out it's
 	// current state, since any actions taken on it since it was
 	// last pulled are in memory, but not in the file.
@@ -301,7 +303,7 @@ User* lookupUser(const long userID){
   // client could have an old ID for a user that has since been
   // deleted, so wee need to check for that, and return nullptr if so.
   auto mapIt = userFileMap.find(userID);
-  if (mapIt == map::end)
+  if (mapIt == userFileMap.end())
     return nullptr;
   // Here, we finally load in the new User, taking ownership of the
   // pointer to it. Then, we update the cache with this new object,
@@ -313,40 +315,40 @@ User* lookupUser(const long userID){
 
 Group* lookupGroup(const long groupID){
   auto cacheIt = groupCache.find(groupID);
-  if (cacheIt != map::end)
+  if (cacheIt != groupCache.end())
     return cacheIt->second.first;
   for(auto it = groupCache.begin(); it != groupCache.end(); ++it){
     if(--it->second.second < 1){
       auto mapIt = groupFileMap.find(it->first);
-      if (mapIt != map::end)
+      if (mapIt != groupFileMap.end())
 	it->second.first->writeToFile(mapIt->second);
       delete it->second.first;
       groupCache.erase(it);
     }
   }
   auto mapIt = groupFileMap.find(groupID);
-  if (mapIt == map::end)
+  if (mapIt == groupFileMap.end())
     return nullptr;
   Group* loadedGroup = Group::readFromFile(mapIt->second);
   groupCache[groupID] = pair<Group*, long>(loadedGroup, GROUP_CACHESIZE);
   return loadedGroup;
 }
 
-Event* lookupEvent(const eventID){
+Event* lookupEvent(const long eventID){
   auto cacheIt = eventCache.find(eventID);
-  if (cacheIt != map::end)
+  if (cacheIt != eventCache.end())
     return cacheIt->second.first;
   for(auto it = groupCache.begin(); it != groupCache.end(); ++it){
     if(--it->second.second < 1){
       auto mapIt = eventFileMap.find(it->first);
-      if (mapIt != map::end)
-	it->second.first->writeToFile(mapIt);
+      if (mapIt != eventFileMap.end())
+	it->second.first->writeToFile(mapIt->second);
       delete it->second.first;
       eventCache.erase(it);
     }
   }
   auto mapIt = eventFileMap.find(eventID);
-  if (mapIt == map::end)
+  if (mapIt == eventFileMap.end())
     return nullptr;
   Event* loadedEvent = Event::readFromFile(mapIt->second);
   eventCache[eventID] = pair<Event*, long>(loadedEvent, EVENT_CACHESIZE);
