@@ -212,7 +212,7 @@ list<long>* getEvents(const long userID){
   return user->getEventIDs();
 }
 
-long userIDByName(const string &username){
+long userIdByName(const string &username){
   for(auto it = userFileMap.begin(); it != userFileMap.end(); ++it){
     if (it->second.substr(userDir.length()) == username)
       return it->first;
@@ -338,7 +338,7 @@ Event* lookupEvent(const long eventID){
   auto cacheIt = eventCache.find(eventID);
   if (cacheIt != eventCache.end())
     return cacheIt->second.first;
-  for(auto it = groupCache.begin(); it != groupCache.end(); ++it){
+  for(auto it = eventCache.begin(); it != eventCache.end(); ++it){
     if(--it->second.second < 1){
       auto mapIt = eventFileMap.find(it->first);
       if (mapIt != eventFileMap.end())

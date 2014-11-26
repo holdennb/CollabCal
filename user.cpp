@@ -32,7 +32,7 @@ bool User::setPassword(const string &oldPassword, const string &newPassword){
   return true;
 }
 
-const std::list<long>* User::getEventIDs(){
+std::list<long>* const User::getEventIDs(){
   auto result = new list<long>();
   transform(eventsInfo.begin(), eventsInfo.end(), result->begin(),
 	    [](pair<long,bool> eventInfo){ return eventInfo.first;});

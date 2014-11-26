@@ -16,7 +16,7 @@ Group::Group(const long id,
 
 const long Group::getID(){ return id; }
 
-const string getName(){ return name;}
+const string Group::getName(){ return name;}
 
 const list<long>* Group::getUserIDs(){
   auto result = new list<long>();
