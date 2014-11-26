@@ -240,4 +240,12 @@ long eventIdByName(const long userID, const string &name){
   return -1;
 }
 
+const unsigned int USER_CACHESIZE = 10;
+const unsigned int GROUP_CACHESIZE = 10;
+const unsigned int EVENT_CACHESIZE = 10;
+
+map<long, pair<User*, long>> userCache;
+map<long, pair<Group*, long>> groupCache;
+map<long, pair<Event*, long>> eventCache;
+
 }
