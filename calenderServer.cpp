@@ -218,4 +218,26 @@ long groupIdByName(const string &name){
   return -1;
 }
 
+long eventIdByName(const string &name){
+  Event* checkingEvent;
+  for(auto it = eventFileMap.begin(); it != groupFileMap.end(); ++it){
+    checkingEvent = lookupEvent(it->first);
+    if (checkingEvent.getName() == name)
+      return checkingGroup.getID();
+  }
+  return -1;
+}
+
+long eventIdByName(const long userID, const string &name){
+  Event* checkingEvent;
+  User* user = lookupUser(userID);
+  list<long> eventIDs = user->getEventIDs();
+  for(auto it = eventIDs.begin(); it != eventIDs.end(); ++it){
+    checkingEvent = lookupEvent(*it);
+    if (checkingEvent.getName() == name)
+      return checkingEvent.getID();
+  }
+  return -1;
+}
+
 }
