@@ -22,11 +22,11 @@ class Event{
   /* Create an event with the given name, occurring at the given time. */
   Event(const std::string &name, const time_t time);
   /* Get the name of the event. */
-  const std::string getName();
+  std::string getName() const;
   /* Get the time at which the event is occurring. */
-  const time_t getTime();
+  time_t getTime() const;
   /* Get the uniqe identifier for this event. */
-  const long getID();
+  long getID() const;
   /* Change the time at which this event is occurring. */
   void reschedule(const time_t newTime);
   /* Change the name of the event. */
@@ -38,7 +38,7 @@ class Event{
      An event file consists of three lines:
      the event id, the event name, and the event time.
   */
-  const bool writeToFile(const std::string &filename);
+  bool writeToFile(const std::string &filename) const;
   /*
      Read an event from the file with the given filename.
      Returns a pointer to the generated event.

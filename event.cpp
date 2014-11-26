@@ -13,17 +13,17 @@ Event::Event(const string &name, const time_t time) :
 Event::Event(const string &name, const time_t time, const long id) :
   id(id), name(name), time(time) {}
 
-const string Event::getName(){ return name; }
+string Event::getName() const { return name; }
 
-const time_t Event::getTime(){ return time; }
+time_t Event::getTime() const { return time; }
 
-const long Event::getID() { return id; }
+long Event::getID() const { return id; }
 
 void Event::reschedule(const time_t newTime){ time = newTime; }
 
 void Event::rename(const string &newName){ name = newName; }
 
-const bool Event::writeToFile(const string &filename){
+bool Event::writeToFile(const string &filename) const {
   ofstream file;
 
   file.open(filename);

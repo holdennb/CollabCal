@@ -26,19 +26,19 @@ class Group{
   Group(const std::list<std::pair<long,bool> > &initialUsers = std::list<std::pair<long,bool> >());
 
   /* Get the unique identifier of this group. */
-  const long getID();
+  long getID() const;
   /* Get the current name of this group. */
-  const std::string getName();
+  std::string getName() const;
   /*
      Get a list of user IDs cooresponding to the users that belong to
      this group. The client is responsible for freeing the result.
   */
-  const std::list<long>* getUserIDs();
+  std::list<long>* getUserIDs() const;
   /* Whether or not the user can modify this group. */
-  const bool userCanWrite(const long userID);
+  bool userCanWrite(const long userID) const;
   /* Get a list of event IDs cooresponding to the events that are part
      of this group. */
-  std::list<long>* const getEventIDs();
+  std::list<long>* getEventIDs() const;
   /* Change the name of the group. */
   void rename(const std::string &newName);
   /*
@@ -66,7 +66,7 @@ class Group{
      followed by a line for each user in the group containing
      the users id.
   */
-  const bool writeToFile(const std::string &filename);
+  bool writeToFile(const std::string &filename) const;
   /*
      Read out a Group object from the file with the given
      filename, returning a pointer to that object.

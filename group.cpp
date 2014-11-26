@@ -14,18 +14,18 @@ Group::Group(const long id,
 	     const std::list<pair<long,bool>> &initialUsers) :
   id(id), userInfos(initialUsers){}
 
-const long Group::getID(){ return id; }
+long Group::getID() const { return id; }
 
-const string Group::getName(){ return name;}
+string Group::getName() const { return name;}
 
-const list<long>* Group::getUserIDs(){
+list<long>* Group::getUserIDs() const {
   auto result = new list<long>();
   transform(userInfos.begin(), userInfos.end(), result->begin(),
 	    [](pair<long,bool> userInfo){ return userInfo.first; });
   return result;
 }
 
-const bool Group::userCanWrite(const long userID){
+bool Group::userCanWrite(const long userID) const {
   for(auto i = userInfos.begin(); i != userInfos.end(); ++i){
     if (i->first == userID)
       return i->second;
@@ -33,7 +33,7 @@ const bool Group::userCanWrite(const long userID){
   return false;
 }
 
-list<long>* const Group::getEventIDs() { return new list<long>(events); }
+list<long>* Group::getEventIDs() const { return new list<long>(events); }
 
 void Group::rename(const string &newName){ name = newName; }
 
@@ -64,7 +64,7 @@ void Group::removeEvent(const long eventID){
   events.remove(eventID);
 }
 
-const bool Group::writeToFile(const string &filename){
+bool Group::writeToFile (const string &filename) const {
   ofstream file;
   file.open(filename);
   if(file.fail())

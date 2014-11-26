@@ -17,11 +17,11 @@ User::User(const string &initialPassword, const long existingID) :
   eventsInfo(list<pair<long,bool>>()){
 }
 
-const long User::getID(){
+long User::getID() const {
   return id;
 }
 
-const bool User::hasPassword(const string &password){
+bool User::hasPassword(const string &password) const {
   return this->password == password;
 }
 
@@ -32,7 +32,7 @@ bool User::setPassword(const string &oldPassword, const string &newPassword){
   return true;
 }
 
-std::list<long>* const User::getEventIDs(){
+std::list<long>* User::getEventIDs() const {
   auto result = new list<long>();
   transform(eventsInfo.begin(), eventsInfo.end(), result->begin(),
 	    [](pair<long,bool> eventInfo){ return eventInfo.first;});
@@ -55,7 +55,7 @@ void User::setCanWrite(const long eventID, const bool canWrite){
 	   });
 }
 
-const bool User::canWrite(const long eventID){
+bool User::canWrite(const long eventID) const {
   for(auto i = eventsInfo.begin(); i != eventsInfo.end(); i++){
     if (i->first == eventID)
       return i->second;
@@ -63,7 +63,7 @@ const bool User::canWrite(const long eventID){
   return false;
 }
 
-const bool User::writeToFile(const string &filename){
+bool User::writeToFile(const string &filename) const {
   ofstream file;
   file.open(filename);
   if(file.fail())
