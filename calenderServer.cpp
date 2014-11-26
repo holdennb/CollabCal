@@ -248,4 +248,97 @@ map<long, pair<User*, long>> userCache;
 map<long, pair<Group*, long>> groupCache;
 map<long, pair<Event*, long>> eventCache;
 
+/* Okay, I haven't put that many comments in the implementation, but
+   for sanitys sake I'm going to comment this one, since it's a
+   doozy. The other two lookup functions are basically the same thing,
+   so I'm only going to comment this one, and those comments also
+   apply to the others.*/
+User* lookupUser(const long userID){
+  // First thing, we check if we already have this user object cached.
+  auto cacheIt = userCache.find(userID);
+  // If we do, we can just return the cached version, and we're done.
+  if (cacheIt != map::end)
+    return cacheIt->second.first;
+
+  // If not, we want to first make room in the cache for a new object,
+  // by kicking out the oldest one.
+  for(auto it = userCache.begin(); it != userCache.end(); ++it){
+    // The second member of the pair that ID's map to is sort of like
+    // a TTL (time to live) counter, in that it starts at cachesize,
+    // and is decremented every time a new object is added, so that
+    // after ten objects are added, the oldest will have TTL 1, and
+    // then get kicked out when it's next decremented.
+    if(--it->second.second < 1){
+      // Now that we've decided to kick out this element, we need to
+      // figure out if we still have a file mapping for it.  If not,
+      // that means that that object was deleted already, so there's
+      // no need to try to save it's state to a file.
+      auto mapIt = userFileMap.find(it->first);
+      if (mapIt != map::end)
+	// If we do have a file mapping, we want to write out it's
+	// current state, since any actions taken on it since it was
+	// last pulled are in memory, but not in the file.
+	it->second.first->writeToFile(mapIt->second);
+      // Since we, the cache, own the pointers to these objects, we
+      // now need to clean it up, and finally remove the item from the
+      // cache.
+      delete it->second.first;
+      userCache.erase(it);
+    }
+  }
+  // Next, we need to try to find the mapping for the file of the new
+  // object we want to pull in. This might not succeed, since the
+  // client could have an old ID for a user that has since been
+  // deleted, so wee need to check for that, and return nullptr if so.
+  auto mapIt = userFileMap.find(userID);
+  if (mapIt == map::end)
+    return nullptr;
+  // Here, we finally load in the new User, taking ownership of the
+  // pointer to it. Then, we update the cache with this new object,
+  // and return the new object. We're done!
+  User* loadedUser = User::readFromFile(mapIt->second);
+  userCache[userID] = pair<User*, long>(loadedUser, USER_CACHESIZE);
+  return loadedUser;
+}
+
+Group* lookupGroup(const long groupID){
+  auto cacheIt = groupCache.find(groupID);
+  if (cacheIt != map::end)
+    return cacheIt->second.first;
+  for(auto it = groupCache.begin(); it != groupCache.end(); ++it){
+    if(--it->second.second < 1){
+      auto mapIt = groupFileMap.find(it->first);
+      if (mapIt != map::end)
+	it->second.first->writeToFile(mapIt->second);
+      delete it->second.first;
+      groupCache.erase(it);
+    }
+  }
+  auto mapIt = groupFileMap.find(groupID);
+  if (mapIt == map::end)
+    return nullptr;
+  Group* loadedGroup = Group::readFromFile(mapIt->second);
+  groupCache[groupID] = pair<Group*, long>(loadedGroup, GROUP_CACHESIZE);
+  return loadedGroup;
+}
+
+Event* lookupEvent(const eventID){
+  auto cacheIt = eventCache.find(eventID);
+  if (cacheIt != map::end)
+    return cacheIt->second.first;
+  for(auto it = groupCache.begin(); it != groupCache.end(); ++it){
+    if(--it->second.second < 1){
+      auto mapIt = eventFileMap.find(it->first);
+      if (mapIt != map::end)
+	it->second.first->writeToFile(mapIt);
+      delete it->second.first;
+      eventCache.erase(it);
+    }
+  }
+  auto mapIt = eventFileMap.find(eventID);
+  if (mapIt == map::end)
+    return nullptr;
+  Event* loadedEvent = Event::readFromFile(mapIt->second);
+  eventCache[eventID] = pair<Event*, long>(loadedEvent, EVENT_CACHESIZE);
+  return loadedEvent;
 }
