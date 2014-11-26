@@ -212,6 +212,10 @@ long groupIdByName(const string &name){
   Group* checkingGroup;
   for(auto it = groupFileMap.begin(); it != groupFileMap.end(); ++it){
     checkingGroup = lookupGroup(it->first);
-    if (checkingGroup.name
+    if (checkingGroup.getName() == name)
+      return checkingGroup.getID();
   }
+  return -1;
+}
+
 }
