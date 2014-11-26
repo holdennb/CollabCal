@@ -98,7 +98,17 @@ bool addToGroup(const long adderID, const long addedID, const long groupID, cons
   if (group == nullptr) return false;
   if (!group->userCanWrite(adderID))
     return false;
-  return group->addUser(addedID, admin);
+  User* added = lookupUser(addedID);
+  if (added == nullptr)
+    return false;
+  if (!group->addUser(addedID, admin))
+    return false;
+  list<long> groupEvents = group->getEventIDs();
+  for_each(groupEvents.begin(), groupEvents.end(),
+	   [added](long eventID){
+	     added->addEvent(eventID);
+	   });
+  return true;
 }
 
 bool removeFromGroup(const long removerID, const long removedID, const long groupID){

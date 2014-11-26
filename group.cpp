@@ -33,6 +33,8 @@ const bool Group::userCanWrite(const long userID){
   return false;
 }
 
+const list<long>* Group::getEventIDs() { return new list<long>(events); }
+
 void Group::rename(const string &newName){ name = newName; }
 
 bool Group::addUser(const long userID, const bool canWrite){

@@ -30,12 +30,15 @@ class Group{
   /* Get the current name of this group. */
   const std::string getName();
   /*
-     Get a list of user IDs cooresponding to the users
-     that belong to this group.
+     Get a list of user IDs cooresponding to the users that belong to
+     this group. The client is responsible for freeing the result.
   */
   const std::list<long>* getUserIDs();
   /* Whether or not the user can modify this group. */
   const bool userCanWrite(const long userID);
+  /* Get a list of event IDs cooresponding to the events that are part
+     of this group. */
+  const std::list<long>* getEventIDs();
   /* Change the name of the group. */
   void rename(const std::string &newName);
   /*
