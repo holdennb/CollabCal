@@ -1,22 +1,37 @@
 #include "calenderServer.h"
 #include <iostream>
+#include <fstream>
 #include <map>
 #include <chrono>
 #include <random>
 #include <cstdio>
 #include <algorithm>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 using namespace std;
 
 string userDir = "users/";
+string userIndex = "users.file";
 string eventDir = "events/";
+string eventIndex = "events.file";
 string groupDir = "groups/";
+string groupIndex = "groups.file";
 map<long, string> userFileMap;
 map<long, string> eventFileMap;
 map<long, string> groupFileMap;
 map<long long, long> sessionMap;
 
 int main(int argc, char** argv){
+}
+
+void init(){
+  struct stat buffer;
+  string userIndexFile = userDir.append(userIndex);
+  if (stat(userIndexFile.c_str(), &buffer) == 0){
+    ifstream usersFile;
+    file.open(userIndexFile);
+  }
 }
 
 long makeUser(const string &username, const string &password){
