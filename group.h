@@ -8,8 +8,6 @@
  */
 class Group{
  private:
-  /* The next group ID to use. */
-  static long ID_COUNTER;
   /* The id of this group. */
   const long id;
   /* The name of this group. */
@@ -22,6 +20,8 @@ class Group{
   Group(const long id,
 	const std::list<std::pair<long,bool> > &initialUsers = std::list<std::pair<long,bool> >());
  public:
+  /* The next group ID to use. */
+  static long ID_COUNTER;
   /* Create a group with some initial users in it. */
   Group(const std::list<std::pair<long,bool> > &initialUsers = std::list<std::pair<long,bool> >());
 
