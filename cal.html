@@ -1,0 +1,234 @@
+<html>
+<head>
+	<title>Collab Cal</title>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+	<script src="scripts.js"></script>
+	<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+	<p id="user">Logged in as <span class="username">holdennb</span><span class="id">1</span>
+	 <span class="groups">(groups)</span></p>
+	<div id="groups">
+		<div class="your-groups form-div">
+			<h3>Your groups:</h3>
+			<ul>
+				<li>CSE461</li>
+				<li>Spelunking Club</li>
+			</ul>
+		</div>
+		<div class="make-group form-div">
+			<h3>Create New Group</h3>
+			<form action="#" method="POST">
+				<input type="hidden" name="uid" class="uid" />
+				<label>Group Name</label><br />
+				<input type="text" name="group-name" class="group-name" /><br />
+				<input type="submit" value="Create" class="submit" />
+			</form>
+		</div>
+		<div class="add-to-group form-div">
+			<h3>Add User to Group</h3>
+			<form action="#" method="POST">
+				<input type="hidden" name="uid" class="uid" />
+				<label>Group Name</label><br />
+				<input type="text" name="group-name" class="group-name" /><br />
+				<label>Username of User to Add</label><br />
+				<input type="text" name="added-name" class="added-name" /><br />
+				<label>Make Admin?</label><br />
+				<input type="checkbox" name="make-admin" class="make-admin" /><br />
+				<input type="submit" value="Add" class="submit" />
+			</form>
+		</div>
+	</div>
+	<h1>Collab Cal!</h1>
+	<div id="table-div">
+		<h3 id="month" data-value="11"><span id="month-name">November</span>
+		 <span id="year">2014</span></h3>
+		<table>
+			<tr>
+				<th>Sun</th>
+				<th>Mon</th>
+				<th>Tue</th>
+				<th>Wed</th>
+				<th>Thu</th>
+				<th>Fri</th>
+				<th>Sat</th>
+			</tr>
+			<tr>
+				<td>
+					<span class="day-num"></span>
+				</td>
+				<td>
+					<span class="day-num"></span>
+				</td>
+				<td>
+					<span class="day-num"></span>
+				</td>
+				<td>
+					<span class="day-num"></span>
+				</td>
+				<td>
+					<span class="day-num"></span>
+				</td>
+				<td>
+					<span class="day-num"></span>
+				</td>
+				<td class="real-day">
+					<span class="day-num day-1">1</span>
+				</td>
+			</tr>
+			<tr>
+				<td class="real-day">
+					<span class="day-num day-2">2</span>
+				</td>
+				<td class="real-day">
+					<span class="day-num day-3">3</span>
+				</td>
+				<td class="real-day">
+					<span class="day-num day-4">4</span>
+				</td>
+				<td class="real-day">
+					<span class="day-num day-5">5</span>
+					<div class="event" data-value="1">
+						<span class="time">8:30</span>:
+						<span class="name">Guy Fawkes Day</span>
+					</div>
+					<div class="event" data-value="2">
+						<span class="time">12:30</span>:
+						<span class="name">Remember Remember!</span>
+					</div>
+				</td>
+				<td class="real-day">
+					<span class="day-num day-6">6</span>
+				</td>
+				<td class="real-day">
+					<span class="day-num day-7">7</span>
+				</td>
+				<td class="real-day">
+					<span class="day-num day-8">8</span>
+				</td>
+			</tr>
+			<tr>
+				<td class="real-day">
+					<span class="day-num day-9">9</span>
+				</td>
+				<td class="real-day">
+					<span class="day-num day-10">10</span>
+				</td>
+				<td class="real-day">
+					<span class="day-num day-11">11</span>
+				</td>
+				<td class="real-day">
+					<span class="day-num day-12">12</span>
+				</td>
+				<td class="real-day">
+					<span class="day-num day-13">13</span>
+				</td>
+				<td class="real-day">
+					<span class="day-num day-14">14</span>
+				</td>
+				<td class="real-day">
+					<span class="day-num day-15">15</span>
+				</td>
+			</tr>
+			<tr>
+				<td class="real-day">
+					<span class="day-num day-16">16</span>
+				</td>
+				<td class="real-day">
+					<span class="day-num day-17">17</span>
+				</td>
+				<td class="real-day">
+					<span class="day-num day-18">18</span>
+				</td>
+				<td class="real-day">
+					<span class="day-num day-19">19</span>
+				</td>
+				<td class="real-day">
+					<span class="day-num day-20">20</span>
+				</td>
+				<td class="real-day">
+					<span class="day-num day-21">21</span>
+				</td>
+				<td class="real-day">
+					<span class="day-num day-22">22</span>
+					<div class="event" data-value="3">
+						<span class="time">16:30</span>:
+						<span class="name">Scott's Birthday</span>
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<td class="real-day">
+					<span class="day-num day-23">23</span>
+				</td>
+				<td class="real-day">
+					<span class="day-num day-24">24</span>
+				</td>
+				<td class="real-day today">
+					<span class="day-num day-25">25</span>
+				</td>
+				<td class="real-day">
+					<span class="day-num day-26">26</span>
+				</td>
+				<td class="real-day">
+					<span class="day-num day-27">27</span>
+				</td>
+				<td class="real-day">
+					<span class="day-num day-28">28</span>
+				</td>
+				<td class="real-day">
+					<span class="day-num day-29">29</span>
+				</td>
+			</tr>
+			<tr>
+				<td class="real-day">
+					<span class="day-num day-30">30</span>
+				</td>
+				<td>
+					<span class="day-num"></span>
+				</td>
+				<td>
+					<span class="day-num"></span>
+				</td>
+				<td>
+					<span class="day-num"></span>
+				</td>
+				<td>
+					<span class="day-num"></span>
+				</td>
+				<td>
+					<span class="day-num"></span>
+				</td>
+				<td>
+					<span class="day-num"></span>
+				</td>
+			</tr>
+		</table>
+	</div>
+	<div id="edit-event" class="form-div">
+		<h3>Edit Event</h3>
+		<form action="#" method="POST">
+			<input type="hidden" name="id" class="event-id" />
+			<input type="hidden" name="uid" class="uid" />
+			<label>Event Name</label><br />
+			<input type="text" name="name" class="event-name" /><br />
+			<label>Event Date &amp; Time <br />(YYYY-MM-DD HH:MM)</label><br />
+			<input type="text" name="datetime" class="event-datetime" /><br />
+			<input type="submit" value="Submit" class="submit" />
+		</form>
+	</div>
+	<div id="create-event" class="form-div">
+		<h3>Create New Event</h3>
+		<form action="#" method="POST">
+			<input type="hidden" name="uid" class="uid" />
+			<label>Event Name</label><br />
+			<input type="text" name="name" class="event-name" /><br />
+			<label>Event Date &amp; Time <br />(YYYY-MM-DD HH:MM)</label><br />
+			<input type="text" name="datetime" class="event-datetime" /><br />
+			<label>Group Name (optional)</label><br />
+			<input type="text" name="group-name" class="group-name" /><br />
+			<input type="submit" value="Submit" class="submit" />
+		</form>
+	</div>
+</body>
+</html>

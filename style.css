@@ -1,0 +1,145 @@
+body {
+	font-family: Helvetica, sans-serif;
+}
+
+h1 {
+	text-align: center;
+	clear: both;
+}
+
+#table-div {
+	width: 90%;
+	margin: 0 auto;
+}
+
+table {
+	width: 100%;
+}
+
+table, th, td {
+	border: 1px solid #ccc;
+	border-collapse: collapse;
+}
+
+table, td {
+	min-height: 556px;
+}
+
+th, td {
+	width: 14%;
+}
+
+th {
+	height: 32px;
+	border: 1px solid #000;
+}
+
+td.real-day {
+	border: 1px solid #999;
+	vertical-align: top;
+}
+
+td.real-day .day-num {
+	font-size: 0.8em;
+}
+
+td.today {
+	background-color: #f8f8f5;
+}
+
+td .event {
+	background-color: #CCE8F4;
+	padding: 3px;
+	cursor: pointer;
+	margin: 2px;
+}
+
+#user {
+	float: right;
+}
+
+#user .id {
+	display: none;
+}
+
+
+
+/* Form */
+.form-div {
+	width: 70%;
+	text-align: center;
+	margin: 30px auto;
+	border: 1px solid #333;
+	padding: 20px;
+	clear: both;
+}
+
+#edit-event {
+	display: none;
+}
+
+.form-div form {
+	margin: 0px;
+}
+
+.form-div input.submit {
+	font-size: 1.2em;
+	margin: 10px;
+}
+
+#groups {
+	display: none;
+}
+
+#groups ul {
+	list-style: none;
+	padding: 0px;
+}
+
+
+
+
+
+
+
+/* Log in page */
+#container {
+	width: 300px;
+	margin: 0 auto;
+	text-align: center;
+}
+
+input {
+	margin: 5px;
+}
+
+#container .register-link, #user .groups {
+	text-decoration: underline;
+	color: blue;
+	cursor: pointer;
+}
+
+#container #register-div {
+	display: none;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
