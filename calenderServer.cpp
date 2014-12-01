@@ -6,8 +6,10 @@
 #include <random>
 #include <cstdio>
 #include <algorithm>
+#include <stdexcept>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sstream>
 
 using namespace std;
 
@@ -23,14 +25,171 @@ map<long, string> groupFileMap;
 map<long long, long> sessionMap;
 
 int main(int argc, char** argv){
+  init();
+
+  // Do stuff...
+
+  shutdown();
+}
+
+void shutdown(){
+  dumpCache();
+  saveFileIndices();
+}
+
+void saveFileIndices(){
+  ofstream usersFile;
+  usersFile.open(userDir.append(userIndex));
+  usersFile << User::ID_COUNTER << endl;
+  for_each(userFileMap.begin(), userFileMap.end(),
+	   [&usersFile](pair<long, string> filemap){
+	     usersFile << filemap.first << " " << filemap.second << endl;
+	   });
+  usersFile.close();
+
+  ofstream groupFile;
+  groupFile.open(groupDir.append(groupIndex));
+  for_each(groupFileMap.begin(), groupFileMap.end(),
+	   [&groupFile](pair<long, string> filemap){
+	     groupFile << filemap.first << " " << filemap.second << endl;
+	   });
+  groupFile.close();
+
+  ofstream eventFile;
+  eventFile.open(eventDir.append(eventIndex));
+  for_each(eventFileMap.begin(), eventFileMap.end(),
+	   [&eventFile](pair<long, string> filemap){
+	     eventFile << filemap.first << " " << filemap.second << endl;
+	   });
+  eventFile.close();
 }
 
 void init(){
+  parseUserFile();
+  parseEventFile();
+  parseGroupFile();
+}
+
+void parseUserFile(){
   struct stat buffer;
   string userIndexFile = userDir.append(userIndex);
   if (stat(userIndexFile.c_str(), &buffer) == 0){
     ifstream usersFile;
-    file.open(userIndexFile);
+    string nextIdLine;
+    string usermapLine;
+    long userID;
+    string userPath;
+    
+    usersFile.open(userIndexFile);
+    if(usersFile.fail()){
+      cerr << "Problem opening existing user file..." << endl;
+      return;
+    }
+    
+    if(!getline(usersFile,nextIdLine)){
+      cerr << "Problem parsing existing user file: could not get first line." << endl;
+      return;
+    }
+    try{
+      User::ID_COUNTER = stol(nextIdLine);
+    } catch(invalid_argument e){
+      cerr << "Problem parsing existing user file: first line is not a valid integer." << endl;
+      return;
+    } catch(out_of_range e){
+      cerr << "Problem parsing existing user file: first line is too big of a number!" << endl;
+      return;
+    }
+
+    while(getline(usersFile,usermapLine)){
+      stringstream usermapStream(usermapLine);
+      usermapStream >> userID;
+      usermapStream >> userPath;
+      userFileMap[userID] = userPath;
+    }
+
+    usersFile.close();
+  }
+}
+
+void parseGroupFile(){
+  struct stat buffer;
+  string groupIndexFile = groupDir.append(groupIndex);
+  if (stat(groupIndexFile.c_str(), &buffer) == 0){
+    ifstream groupFile;
+    string nextIdLine;
+    string groupmapLine;
+    long groupID;
+    string groupPath;
+    
+    groupFile.open(groupIndexFile);
+    if(groupFile.fail()){
+      cerr << "Problem opening existing group file..." << endl;
+      return;
+    }
+    
+    if(!getline(groupFile,nextIdLine)){
+      cerr << "Problem parsing existing group file: could not get first line." << endl;
+      return;
+    }
+    try{
+      Group::ID_COUNTER = stol(nextIdLine);
+    } catch(invalid_argument e){
+      cerr << "Problem parsing existing group file: first line is not a valid integer." << endl;
+      return;
+    } catch(out_of_range e){
+      cerr << "Problem parsing existing group file: first line is too big of a number!" << endl;
+      return;
+    }
+
+    while(getline(groupFile,groupmapLine)){
+      stringstream groupmapStream(groupmapLine);
+      groupmapStream >> groupID;
+      groupmapStream >> groupPath;
+      groupFileMap[groupID] = groupPath;
+    }
+
+    groupFile.close();
+  }
+}
+
+void parseEventFile(){
+  struct stat buffer;
+  string eventIndexFile = eventDir.append(eventIndex);
+  if (stat(eventIndexFile.c_str(), &buffer) == 0){
+    ifstream eventsFile;
+    string nextIdLine;
+    string eventmapLine;
+    long eventID;
+    string eventPath;
+    
+    eventsFile.open(eventIndexFile);
+    if(eventsFile.fail()){
+      cerr << "Problem opening existing event file..." << endl;
+      return;
+    }
+    
+    if(!getline(eventsFile,nextIdLine)){
+      cerr << "Problem parsing existing event file: could not get first line." << endl;
+      return;
+    }
+    try{
+      Event::ID_COUNTER = stol(nextIdLine);
+    } catch(invalid_argument e){
+      cerr << "Problem parsing existing event file: first line is not a valid integer." << endl;
+      return;
+    } catch(out_of_range e){
+      cerr << "Problem parsing existing event file: first line is too big of a number!" << endl;
+      return;
+    }
+
+    while(getline(eventsFile,eventmapLine)){
+      stringstream eventmapStream(eventmapLine);
+      eventmapStream >> eventID;
+      eventmapStream >> eventPath;
+      eventFileMap[eventID] = eventPath;
+    }
+
+    eventsFile.close();
   }
 }
 
@@ -368,4 +527,19 @@ Event* lookupEvent(const long eventID){
   Event* loadedEvent = Event::readFromFile(mapIt->second);
   eventCache[eventID] = pair<Event*, long>(loadedEvent, EVENT_CACHESIZE);
   return loadedEvent;
+}
+
+void dumpCache(){
+  for_each(userCache.begin(), userCache.end(),
+	   [](pair<long, pair<User*, long> > entry){
+	     entry.second.first->writeToFile(userFileMap[entry.first]);
+	   });
+  for_each(groupCache.begin(), groupCache.end(),
+	   [](pair<long, pair<Group*, long> > entry){
+	     entry.second.first->writeToFile(groupFileMap[entry.first]);
+	   });
+  for_each(eventCache.begin(), eventCache.end(),
+	   [](pair<long, pair<Event*, long> > entry){
+	     entry.second.first->writeToFile(eventFileMap[entry.first]);
+	   });
 }

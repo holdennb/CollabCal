@@ -5,8 +5,6 @@
 
 class User{
  private:
-  /* The next user ID to use. */
-  static long ID_COUNTER;
   /* The id of this user. */
   const long id;
   /*
@@ -32,6 +30,8 @@ class User{
   User(const std::string &password, const long id);
 
  public:
+  /* The next user ID to use. */
+  static long ID_COUNTER;
   /* Create a user that can not view any events,
      and has the given password.*/
   User(const std::string &password);

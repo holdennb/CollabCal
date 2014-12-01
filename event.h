@@ -5,8 +5,6 @@
 #include <list>
 class Event{
  private:
-  /* The ID of the next created event. */
-  static long ID_COUNTER;
   /* The unique identifier for this event. */
   long id;
   /* The public name of the event. */
@@ -19,6 +17,8 @@ class Event{
   */
   Event(const std::string &name, const time_t time, const long id);
  public:
+  /* The ID of the next created event. */
+  static long ID_COUNTER;
   /* Create an event with the given name, occurring at the given time. */
   Event(const std::string &name, const time_t time);
   /* Get the name of the event. */
