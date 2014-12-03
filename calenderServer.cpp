@@ -10,6 +10,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sstream>
+#include <time.h>
 
 using namespace std;
 
@@ -384,6 +385,35 @@ bool deleteEvent(const long userID, const long eventID){
 list<long>* getEvents(const long userID){
   User* user = lookupUser(userID);
   return user->getEventIDs();
+}
+
+// Construct JSON string of a user's events
+string getEventsJson(const long userID) {
+  list<long>* events = getEvents(userID);
+  string jsonString;
+  std::stringstream json;
+  json << "[";
+  for (long eventID: *events) {
+    Event* event = lookupEvent(eventID);
+    json << "{";
+    json << "\"id\": \"" << event->getID() << "\",";
+    json << "\"name\": \"" << event->getName() << "\",";
+    time_t time = event->getTime();
+    struct tm * timeinfo = localtime(&time);
+    json << "\"year\": \"" << (timeinfo->tm_year + 1900) << "\",";
+    json << "\"day\": \"" << timeinfo->tm_mday << "\",";
+    // 24 hour time
+    json << "\"time\": \"" << timeinfo->tm_hour << ":";
+    if (timeinfo->tm_min < 10) {
+      json << "0" << timeinfo->tm_min << "\"";
+    } else {
+      json << timeinfo->tm_min << "\"";
+    }
+    json << "},";
+  }
+  json << "]";
+  json >> jsonString;
+  return jsonString;
 }
 
 long userIdByName(const string &username){
