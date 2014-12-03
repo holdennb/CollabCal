@@ -44,7 +44,7 @@ td.real-day .day-num {
 }
 
 td.today {
-	background-color: #f8f8f5;
+	background-color: #EBFFEA;
 }
 
 td .event {
@@ -52,6 +52,10 @@ td .event {
 	padding: 3px;
 	cursor: pointer;
 	margin: 2px;
+}
+
+td .event.active {
+	background-color: cornflowerblue;
 }
 
 #user {
@@ -94,6 +98,15 @@ td .event {
 #groups ul {
 	list-style: none;
 	padding: 0px;
+}
+
+#edit-event .modified {
+	background-color: #F5FF98;
+	color: rgb(255, 104, 104);
+	padding: 4px 9px;
+	margin: 12px auto;
+	width: 415px;
+	display: none;
 }
 
 

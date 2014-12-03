@@ -13,10 +13,17 @@
 			$("#groups").toggle();
 		});
 
+		// Put user id into event form
 		$(".form-div input.uid").val($("#user").find(".id").text());
 
 		// Populating edit event form on event click
 		$(".event").click(function() {
+			// Delegate active class appropriately
+			$("#table-div .event").removeClass("active");
+			$(this).addClass("active");
+
+			$("#edit-event .modified").hide();
+
 			$("#edit-event input[name='name']").val($(this).find(".name").text());
 			var month = $("#month").attr("data-value");
 			var day = $(this).parent().find(".day-num").text();
@@ -33,7 +40,9 @@
 			$("#edit-event").show();
 		});
 
-		// Ajax form submits
+		//// Ajax form submits
+
+		// Edit event
 		$("#edit-event form").submit(function(e) {
 			var postData = $(this).serializeArray();
 		    var formURL = $(this).attr("action");
@@ -49,9 +58,9 @@
 		        }
 		    });
 		    e.preventDefault();
-		    e.unbind();
-		});
+		    e.unbind();});
 
+		// Create event
 		$("#create-event form").submit(function(e) {
 			var postData = $(this).serializeArray();
 		    var formURL = $(this).attr("action");
@@ -70,6 +79,7 @@
 		    e.unbind();
 		});
 
+		// Create group
 		$("#groups .make-group form").submit(function(e) {
 			var postData = $(this).serializeArray();
 		    var formURL = $(this).attr("action");
@@ -88,6 +98,7 @@
 		    e.unbind();
 		});
 
+		// Add to group
 		$("#groups .add-to-group form").submit(function(e) {
 			var postData = $(this).serializeArray();
 		    var formURL = $(this).attr("action");
@@ -110,17 +121,13 @@
 		(function poll(){
 		   setTimeout(function(){
 		      $.ajax({ url: "getEventsServer", success: function(data){
-		        updateEvents(JSON.parse(data);
+		        updateEvents(JSON.parse(data));
 
 		        // Call this function (in 10 seconds)
 		        poll();
 		      }, dataType: "json"});
 		  }, 10000);
 		})();
-
-
-
-
 
 
 
@@ -154,24 +161,37 @@
 		var curMonth = parseInt($("#month").attr("data-value"));
 
 		// clear out inactive events
-		$("#table-div td.real-day .events:not(.active)").remove();
+		$("#table-div td.real-day .event:not(.active)").remove();
+		var active = $("#table-div td.real-day .event.active");
 
 		for (var event in data) {
 			if (event.year == curYear && event.month == curMonth) {
-				// it's in the right month, so append the event to the appropriate day
 
-				var td = $("#table-div td.real-day.day-" + event.day);
+				if (event.id == active.attr("data-value")
+					&& (active.children(".time").text() != event.time
+						|| active.children(".name").text() != event.name
+						|| active.siblings("day-num").text() != event.day)) {
+					// An update has been made to the currently active event
+					$("#edit-event .modified").show();
+				} else if (event.id != activeId) {
+					// in the right month and not active, so append the event to the right day
 
-				var newEvent = $("<div class='event'></div>");
-				newEvent.attr("data-value", event.id);
-				newEvent.append("<span class='time'>" + event.time + "</span>");
-				newEvent.append(": ");
-				newEvent.append("<span class='name'>" + event.name + "</span>");
+					var td = $("#table-div td.real-day.day-" + event.day);
 
-				td.append(newEvent);
+					var newEvent = $("<div class='event'></div>");
+					newEvent.attr("data-value", event.id);
+					newEvent.append("<span class='time'>" + event.time + "</span>");
+					newEvent.append(": ");
+					newEvent.append("<span class='name'>" + event.name + "</span>");
+
+					td.append(newEvent);
+				}
 			}
 		}
 
+		$("#table-div td.real-day .event.active").each(function() {
+
+		});
 
 
 	}
