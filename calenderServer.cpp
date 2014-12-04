@@ -11,6 +11,7 @@
 #include <sys/stat.h>
 #include <sstream>
 #include <time.h>
+#include <mutex>
 
 using namespace std;
 
@@ -238,8 +239,8 @@ long long login(const string &username, const string &password){
   long userID = userIdByName(username);
   if(userID == -1)
     return -1;
-  User* user = lookupUser(userID);
-  if (user == nullptr){
+  auto user = acquireUser(userID);
+  if (user.isNull()){
     cerr << "was given a bad userID by function userIdByName!" << endl;
     return -1;
   }
@@ -263,13 +264,16 @@ long long login(const string &username, const string &password){
 }
 
 bool userChangePassword(const long userID, const string &oldPassword, const string &newPassword){
-  User* user = lookupUser(userID);
-  if (user == nullptr)
+  auto user = acquireUser(userID);
+  if (user.isNull())
     return false;
-  return user->setPassword(oldPassword, newPassword);
+  bool result = user->setPassword(oldPassword, newPassword);
+  return result;
 }
 
 bool deleteUser(const long userID){
+  // We acquire the user to make sure no one else is using it.
+  auto user = acquireUser(userID);
   auto it = userFileMap.find(userID);
   if (it == userFileMap.end())
     return false;
@@ -291,25 +295,27 @@ long makeGroup(const long userID, const string &groupName){
 }
 
 void renameGroup(const long userID, const long groupID, const string &newName){
-  Group* group = lookupGroup(groupID);
-  if (group == nullptr || !group->userCanWrite(userID))
+  auto group = acquireGroup(groupID);
+  if (group.isNull() || !group->userCanWrite(userID)){
     return;
+  }
   group->rename(newName);
 }
 
 bool addToGroup(const long adderID, const long addedID, const long groupID, const bool admin){
-  Group* group = lookupGroup(groupID);
-  if (group == nullptr) return false;
-  if (!group->userCanWrite(adderID))
+  auto group = acquireGroup(groupID);
+  if (group.isNull()) return false;
+  if (!group->userCanWrite(adderID)){
     return false;
-  User* added = lookupUser(addedID);
-  if (added == nullptr)
+  }
+  auto added = acquireUser(addedID);
+  if (added.isNull())
     return false;
   if (!group->addUser(addedID, admin))
     return false;
   list<long>* groupEvents = group->getEventIDs();
   for_each(groupEvents->begin(), groupEvents->end(),
-	   [added](long eventID){
+	   [&added](long eventID){
 	     added->addEvent(eventID, false);
 	   });
   delete groupEvents;
@@ -317,16 +323,16 @@ bool addToGroup(const long adderID, const long addedID, const long groupID, cons
 }
 
 bool removeFromGroup(const long removerID, const long removedID, const long groupID){
-  Group* group = lookupGroup(groupID);
-  if (group == nullptr) return false;
+  auto group = acquireGroup(groupID);
+  if (group.isNull()) return false;
   if (!group->userCanWrite(removerID))
     return false;
   return group->removeUser(removedID);
 }
 
 bool deleteGroup(const long userID, const long groupID){
-  Group* group = lookupGroup(groupID);
-  if (group == nullptr) return false;
+  auto group = acquireGroup(groupID);
+  if (group.isNull()) return false;
   if (!group->userCanWrite(userID))
     return false;
   auto it = groupFileMap.find(userID);
@@ -341,8 +347,8 @@ long makeEvent(const long userID, const string &eventName, const time_t eventTim
   long eventID = newEvent.getID();
   string eventFilename = eventDir + eventName;
   
-  User* user = lookupUser(userID);
-  if (user == nullptr) return -1;
+  auto user = acquireUser(userID);
+  if (user.isNull()) return -1;
   
   if(!newEvent.writeToFile(eventFilename)){
     cerr << "could not create event " << eventName << ": problem writing group file!" << endl;
@@ -354,31 +360,31 @@ long makeEvent(const long userID, const string &eventName, const time_t eventTim
 }
 
 void renameEvent(const long userID, const long eventID, const std::string &newName){
-  Event* event = lookupEvent(eventID);
-  User* user = lookupUser(userID);
-  if (event == nullptr || user == nullptr || !user->canWrite(eventID))
+  auto event = acquireEvent(eventID);
+  auto user = acquireUser(userID);
+  if (event.isNull() || user.isNull() || !user->canWrite(eventID))
     return;
   event->rename(newName);
 }
 
 void rescheduleEvent(const long userID, const long eventID, const time_t newTime){
-  Event* event = lookupEvent(eventID);
-  User* user = lookupUser(userID);
-  if (event == nullptr || user == nullptr || !user->canWrite(eventID))
+  auto event = acquireEvent(eventID);
+  auto user = acquireUser(userID);
+  if (event.isNull() || user.isNull() || !user->canWrite(eventID))
     return;
   event->reschedule(newTime);
 }
 
 long makeEvent(const long userID, const string &eventName, const time_t eventTime, const long groupID,
 	       bool groupWritable){
-  Group* group = lookupGroup(groupID);
-  if (group == nullptr) return -1;
+  auto group = acquireGroup(groupID);
+  if (group.isNull()) return -1;
   long eventID = makeEvent(userID, eventName, eventTime);
   group->addEvent(eventID);
   auto userIDs = group->getUserIDs();
   for_each(userIDs->begin(), userIDs->end(),
 	   [eventID, groupWritable](long userID){
-	     User* user = lookupUser(userID);
+	     auto user = acquireUser(userID);
 	     user->addEvent(eventID,groupWritable);
 	   });
   delete userIDs;
@@ -386,22 +392,40 @@ long makeEvent(const long userID, const string &eventName, const time_t eventTim
 }
 
 bool inviteToEvent(const long inviterID, const long inviteeID, const long eventID, const bool canChange){
-  User* inviter = lookupUser(inviterID);
-  if (inviter == nullptr || !inviter->canWrite(eventID))
-    return false;
-  User* invitee = lookupUser(inviteeID);
-  if (invitee == nullptr)
-    return false;
-  invitee->addEvent(eventID, canChange);
-  return true;
+  // We do this to prevent deadlocks if one thread has A trying to
+  // invite B while another has B trying to invite A.
+  if (inviterID < inviteeID){
+    auto inviter = acquireUser(inviterID);
+    auto invitee = acquireUser(inviteeID);
+
+    if (inviter.isNull() || !inviter->canWrite(eventID))
+      return false;
+    if (invitee.isNull())
+      return false;
+    invitee->addEvent(eventID, canChange);
+    return true;
+
+  } else {
+    auto invitee = acquireUser(inviteeID);
+    auto inviter = acquireUser(inviterID);
+
+    if (inviter.isNull() || !inviter->canWrite(eventID))
+      return false;
+    if (invitee.isNull())
+      return false;
+    invitee->addEvent(eventID, canChange);
+    return true;
+
+  }
+
 }
 
 bool deleteEvent(const long userID, const long eventID){
-  User* user = lookupUser(userID);
-  if (user == nullptr || !user->canWrite(eventID))
+  auto event = acquireEvent(eventID);
+  if(event.isNull()) return false;
+  auto user = acquireUser(userID);
+  if (user.isNull() || !user->canWrite(eventID))
     return false;
-  Event* event = lookupEvent(eventID);
-  if(event == nullptr) return false;
   auto it = eventFileMap.find(eventID);
   if(it == eventFileMap.end())
     return false;
@@ -411,7 +435,7 @@ bool deleteEvent(const long userID, const long eventID){
 }
 
 list<long>* getEvents(const long userID){
-  User* user = lookupUser(userID);
+  auto user = acquireUser(userID);
   return user->getEventIDs();
 }
 
@@ -422,7 +446,7 @@ string getEventsJson(const long userID) {
   std::stringstream json;
   json << "[";
   for (long eventID: *events) {
-    Event* event = lookupEvent(eventID);
+    auto event = acquireEvent(eventID);
     json << "{";
     json << "\"id\": \"" << event->getID() << "\",";
     json << "\"name\": \"" << event->getName() << "\",";
@@ -453,9 +477,8 @@ long userIdByName(const string &username){
 }
 
 long groupIdByName(const string &name){
-  Group* checkingGroup;
   for(auto it = groupFileMap.begin(); it != groupFileMap.end(); ++it){
-    checkingGroup = lookupGroup(it->first);
+    auto checkingGroup = acquireGroup(it->first);
     if (checkingGroup->getName() == name)
       return checkingGroup->getID();
   }
@@ -463,9 +486,8 @@ long groupIdByName(const string &name){
 }
 
 long eventIdByName(const string &name){
-  Event* checkingEvent;
   for(auto it = eventFileMap.begin(); it != groupFileMap.end(); ++it){
-    checkingEvent = lookupEvent(it->first);
+    auto checkingEvent = acquireEvent(it->first);
     if (checkingEvent->getName() == name)
       return checkingEvent->getID();
   }
@@ -473,11 +495,10 @@ long eventIdByName(const string &name){
 }
 
 long eventIdByName(const long userID, const string &name){
-  Event* checkingEvent;
-  User* user = lookupUser(userID);
+  auto user = acquireUser(userID);
   list<long>* eventIDs = user->getEventIDs();
   for(auto it = eventIDs->begin(); it != eventIDs->end(); ++it){
-    checkingEvent = lookupEvent(*it);
+    auto checkingEvent = acquireEvent(*it);
     if (checkingEvent->getName() == name)
       return checkingEvent->getID();
   }
@@ -488,45 +509,68 @@ const unsigned int USER_CACHESIZE = 10;
 const unsigned int GROUP_CACHESIZE = 10;
 const unsigned int EVENT_CACHESIZE = 10;
 
-map<long, pair<User*, long>> userCache;
-map<long, pair<Group*, long>> groupCache;
-map<long, pair<Event*, long>> eventCache;
+template <typename T>
+struct cacheRecord{
+  T* item;
+  unsigned ttl;
+  mutex m;
+};
+
+map<long, cacheRecord<User>* > userCache;
+mutex userCacheManager;
+map<long, cacheRecord<Group>* > groupCache;
+mutex groupCacheManager;
+map<long, cacheRecord<Event>* > eventCache;
+mutex eventCacheManager;
 
 /* Okay, I haven't put that many comments in the implementation, but
    for sanitys sake I'm going to comment this one, since it's a
    doozy. The other two lookup functions are basically the same thing,
    so I'm only going to comment this one, and those comments also
    apply to the others.*/
-User* lookupUser(const long userID){
+lockptr<User> acquireUser(const long userID){
+  userCacheManager.lock();
   // First thing, we check if we already have this user object cached.
   auto cacheIt = userCache.find(userID);
-  // If we do, we can just return the cached version, and we're done.
-  if (cacheIt != userCache.end())
-    return cacheIt->second.first;
+  // If we do, we can just lock the cached version, return it, and
+  // we're done.
+  if (cacheIt != userCache.end()){
+    auto entry = cacheIt->second;
+    userCacheManager.unlock();
+    return lockptr<User>(entry->item, &(entry->m));
+  }
 
   // If not, we want to first make room in the cache for a new object,
   // by kicking out the oldest one.
   for(auto it = userCache.begin(); it != userCache.end(); ++it){
-    // The second member of the pair that ID's map to is sort of like
-    // a TTL (time to live) counter, in that it starts at cachesize,
-    // and is decremented every time a new object is added, so that
-    // after ten objects are added, the oldest will have TTL 1, and
-    // then get kicked out when it's next decremented.
-    if(--it->second.second < 1){
+    // Each cache entry has a ttl, which is initialized at the size of
+    // the cache, and decremented every time we want to add something
+    // new to the cache, so that if always we kick out objects with
+    // non-positive TTL, we restrict our cache to the proper
+    // size. Unfortunately, we might need to keep things in our cache
+    // even if they have run out of life, because another thread might
+    // still be holding on to them. This means that our cache might
+    // grow above cachesize, but will never grow above
+    // cachesize+number_of_threads.
+    auto entry = it->second;
+    if(--entry->ttl < 1 && entry->m.try_lock()){
+      long entryID = it->first;
       // Now that we've decided to kick out this element, we need to
       // figure out if we still have a file mapping for it.  If not,
       // that means that that object was deleted already, so there's
       // no need to try to save it's state to a file.
-      auto mapIt = userFileMap.find(it->first);
+      auto mapIt = userFileMap.find(entryID);
       if (mapIt != userFileMap.end())
 	// If we do have a file mapping, we want to write out it's
 	// current state, since any actions taken on it since it was
 	// last pulled are in memory, but not in the file.
-	it->second.first->writeToFile(mapIt->second);
+	entry->item->writeToFile(mapIt->second);
       // Since we, the cache, own the pointers to these objects, we
       // now need to clean it up, and finally remove the item from the
       // cache.
-      delete it->second.first;
+      delete entry->item;
+      entry->m.unlock();
+      delete entry;
       userCache.erase(it);
     }
   }
@@ -535,69 +579,104 @@ User* lookupUser(const long userID){
   // client could have an old ID for a user that has since been
   // deleted, so wee need to check for that, and return nullptr if so.
   auto mapIt = userFileMap.find(userID);
-  if (mapIt == userFileMap.end())
-    return nullptr;
+  if (mapIt == userFileMap.end()){
+    userCacheManager.unlock();
+    return lockptr<User>(nullptr, nullptr);
+  }
   // Here, we finally load in the new User, taking ownership of the
   // pointer to it. Then, we update the cache with this new object,
   // and return the new object. We're done!
   User* loadedUser = User::readFromFile(mapIt->second);
-  userCache[userID] = pair<User*, long>(loadedUser, USER_CACHESIZE);
-  return loadedUser;
+  cacheRecord<User>* newEntry = new cacheRecord<User>();
+  newEntry->item = loadedUser;
+  newEntry->ttl = USER_CACHESIZE;
+  userCache[userID] = newEntry;
+  userCacheManager.unlock();
+  return lockptr<User>(loadedUser, &(newEntry->m));
 }
 
-Group* lookupGroup(const long groupID){
+lockptr<Group> acquireGroup(const long groupID){
+  groupCacheManager.lock();
   auto cacheIt = groupCache.find(groupID);
-  if (cacheIt != groupCache.end())
-    return cacheIt->second.first;
+  if (cacheIt != groupCache.end()){
+    auto entry = cacheIt->second;
+    groupCacheManager.unlock();
+    return lockptr<Group>(entry->item, &(entry->m));
+  }
   for(auto it = groupCache.begin(); it != groupCache.end(); ++it){
-    if(--it->second.second < 1){
-      auto mapIt = groupFileMap.find(it->first);
+    auto entry = it->second;
+    if(--entry->ttl < 1 && entry->m.try_lock()){
+      long entryID = it->first;
+      auto mapIt = groupFileMap.find(entryID);
       if (mapIt != groupFileMap.end())
-	it->second.first->writeToFile(mapIt->second);
-      delete it->second.first;
+	entry->item->writeToFile(mapIt->second);
+      delete entry->item;
+      entry->m.unlock();
+      delete entry;
       groupCache.erase(it);
     }
   }
   auto mapIt = groupFileMap.find(groupID);
-  if (mapIt == groupFileMap.end())
-    return nullptr;
+  if (mapIt == groupFileMap.end()){
+    groupCacheManager.unlock();
+    return lockptr<Group>(nullptr, nullptr);
+  }
   Group* loadedGroup = Group::readFromFile(mapIt->second);
-  groupCache[groupID] = pair<Group*, long>(loadedGroup, GROUP_CACHESIZE);
-  return loadedGroup;
+  cacheRecord<Group>* newEntry = new cacheRecord<Group>();
+  newEntry->item = loadedGroup;
+  newEntry->ttl = GROUP_CACHESIZE;
+  groupCache[groupID] = newEntry;
+  groupCacheManager.unlock();
+  return lockptr<Group>(loadedGroup, &(newEntry->m));
 }
 
-Event* lookupEvent(const long eventID){
+lockptr<Event> acquireEvent(const long eventID){
+  eventCacheManager.lock();
   auto cacheIt = eventCache.find(eventID);
-  if (cacheIt != eventCache.end())
-    return cacheIt->second.first;
+  if (cacheIt != eventCache.end()){
+    auto entry = cacheIt->second;
+    eventCacheManager.unlock();
+    return lockptr<Event>(entry->item, &(entry->m));
+  }
+
   for(auto it = eventCache.begin(); it != eventCache.end(); ++it){
-    if(--it->second.second < 1){
-      auto mapIt = eventFileMap.find(it->first);
+    auto entry = it->second;
+    if(entry->ttl < 1 && entry->m.try_lock()){
+      long entryID = it->first;
+      auto mapIt = eventFileMap.find(entryID);
       if (mapIt != eventFileMap.end())
-	it->second.first->writeToFile(mapIt->second);
-      delete it->second.first;
+	entry->item->writeToFile(mapIt->second);
+      delete entry->item;
+      entry->m.unlock();
+      delete entry;
       eventCache.erase(it);
     }
   }
   auto mapIt = eventFileMap.find(eventID);
-  if (mapIt == eventFileMap.end())
-    return nullptr;
+  if (mapIt == eventFileMap.end()){
+    eventCacheManager.unlock();
+    return lockptr<Event>(nullptr, nullptr);
+  }
   Event* loadedEvent = Event::readFromFile(mapIt->second);
-  eventCache[eventID] = pair<Event*, long>(loadedEvent, EVENT_CACHESIZE);
-  return loadedEvent;
+  cacheRecord<Event>* newEntry = new cacheRecord<Event>();
+  newEntry->item = loadedEvent;
+  newEntry->ttl = EVENT_CACHESIZE;
+  eventCache[eventID] = newEntry;
+  eventCacheManager.unlock();
+  return lockptr<Event>(loadedEvent, &(newEntry->m));
 }
 
 void dumpCache(){
   for_each(userCache.begin(), userCache.end(),
-	   [](pair<long, pair<User*, long> > entry){
-	     entry.second.first->writeToFile(userFileMap[entry.first]);
+	   [](pair<long, cacheRecord<User>* > entry){
+	     entry.second->item->writeToFile(userFileMap[entry.first]);
 	   });
   for_each(groupCache.begin(), groupCache.end(),
-	   [](pair<long, pair<Group*, long> > entry){
-	     entry.second.first->writeToFile(groupFileMap[entry.first]);
+	   [](pair<long, cacheRecord<Group>* > entry){
+	     entry.second->item->writeToFile(groupFileMap[entry.first]);
 	   });
   for_each(eventCache.begin(), eventCache.end(),
-	   [](pair<long, pair<Event*, long> > entry){
-	     entry.second.first->writeToFile(eventFileMap[entry.first]);
+	   [](pair<long, cacheRecord<Event>* > entry){
+	     entry.second->item->writeToFile(eventFileMap[entry.first]);
 	   });
 }
