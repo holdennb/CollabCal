@@ -14,12 +14,12 @@
 
 using namespace std;
 
-string userDir = "users/";
-string userIndex = "users.file";
-string eventDir = "events/";
-string eventIndex = "events.file";
-string groupDir = "groups/";
-string groupIndex = "groups.file";
+const string userDir = "users/";
+const string userIndex = "users.file";
+const string eventDir = "events/";
+const string eventIndex = "events.file";
+const string groupDir = "groups/";
+const string groupIndex = "groups.file";
 map<long, string> userFileMap;
 map<long, string> eventFileMap;
 map<long, string> groupFileMap;
@@ -40,7 +40,17 @@ void shutdown(){
 
 void saveFileIndices(){
   ofstream usersFile;
-  usersFile.open(userDir.append(userIndex));
+  struct stat buffer;
+
+  if(stat(userDir.c_str(), &buffer) != 0)
+    if (mkdir(userDir.c_str(), 0777) != 0)
+      cerr << "Could not create directory " << userDir << endl;
+
+  usersFile.open(userDir + userIndex);
+  if (usersFile.fail() || usersFile.eof()){
+    cerr << "Failed to open users file!" << endl;
+    return;
+  }
   usersFile << User::ID_COUNTER << endl;
   for_each(userFileMap.begin(), userFileMap.end(),
 	   [&usersFile](pair<long, string> filemap){
@@ -48,16 +58,34 @@ void saveFileIndices(){
 	   });
   usersFile.close();
 
+  if(stat(groupDir.c_str(), &buffer) != 0)
+    if (mkdir(groupDir.c_str(), 0777) != 0)
+      cerr << "Could not create directory " << groupDir << endl;
+
   ofstream groupFile;
-  groupFile.open(groupDir.append(groupIndex));
+  groupFile.open(groupDir + groupIndex);
+  if (groupFile.fail() || groupFile.eof()){
+    cerr << "Failed to open group file!" << endl;
+    return;
+  }
+  groupFile << Group::ID_COUNTER << endl;
   for_each(groupFileMap.begin(), groupFileMap.end(),
 	   [&groupFile](pair<long, string> filemap){
 	     groupFile << filemap.first << " " << filemap.second << endl;
 	   });
   groupFile.close();
 
+  if(stat(eventDir.c_str(), &buffer) != 0)
+    if(mkdir(eventDir.c_str(), 0777) != 0)
+      cerr << "Could not create directory " << eventDir << endl;
+
   ofstream eventFile;
-  eventFile.open(eventDir.append(eventIndex));
+  eventFile.open(eventDir + eventIndex);
+  eventFile << Event::ID_COUNTER << endl;
+  if (eventFile.fail() || eventFile.eof()){
+    cerr << "Failed to open event file!" << endl;
+    return;
+  }
   for_each(eventFileMap.begin(), eventFileMap.end(),
 	   [&eventFile](pair<long, string> filemap){
 	     eventFile << filemap.first << " " << filemap.second << endl;
@@ -73,7 +101,7 @@ void init(){
 
 void parseUserFile(){
   struct stat buffer;
-  string userIndexFile = userDir.append(userIndex);
+  string userIndexFile = userDir + userIndex;
   if (stat(userIndexFile.c_str(), &buffer) == 0){
     ifstream usersFile;
     string nextIdLine;
@@ -114,7 +142,7 @@ void parseUserFile(){
 
 void parseGroupFile(){
   struct stat buffer;
-  string groupIndexFile = groupDir.append(groupIndex);
+  string groupIndexFile = groupDir + groupIndex;
   if (stat(groupIndexFile.c_str(), &buffer) == 0){
     ifstream groupFile;
     string nextIdLine;
@@ -155,7 +183,7 @@ void parseGroupFile(){
 
 void parseEventFile(){
   struct stat buffer;
-  string eventIndexFile = eventDir.append(eventIndex);
+  string eventIndexFile = eventDir + eventIndex;
   if (stat(eventIndexFile.c_str(), &buffer) == 0){
     ifstream eventsFile;
     string nextIdLine;
@@ -197,7 +225,7 @@ void parseEventFile(){
 long makeUser(const string &username, const string &password){
   User newUser(password);
   long userID = newUser.getID();
-  string userFileName = userDir.append(username);
+  string userFileName = userDir + username;
   if(!newUser.writeToFile(userFileName)){
     cerr << "could not create user " << username << ": problem writing user file!" << endl;
     return -1;
@@ -253,7 +281,7 @@ bool deleteUser(const long userID){
 long makeGroup(const long userID, const string &groupName){
   Group newGroup(list<pair<long,bool> >(1,pair<long,bool>(userID, true)));
   long groupID = newGroup.getID();
-  string groupFilename = groupDir.append(groupName);
+  string groupFilename = groupDir + groupName;
   if(!newGroup.writeToFile(groupFilename)){
     cerr << "could not create group " << groupName << ": problem writing group file!" << endl;
     return -1;
@@ -311,7 +339,7 @@ bool deleteGroup(const long userID, const long groupID){
 long makeEvent(const long userID, const string &eventName, const time_t eventTime){
   Event newEvent(eventName, eventTime);
   long eventID = newEvent.getID();
-  string eventFilename = eventDir.append(eventName);
+  string eventFilename = eventDir + eventName;
   
   User* user = lookupUser(userID);
   if (user == nullptr) return -1;
