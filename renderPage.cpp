@@ -93,6 +93,117 @@ string getEmptyCalendar() {
   return calString;
 }
 
+string getFooter() {
+  string footerString;
+  stringstream footer;
+  string editEvent   = "#";
+  string createEvent = "#";
+
+  footer << "<div id='edit-event' class='form-div'>";
+  footer << "<h3>Edit Event</h3>";
+  footer << "<form action='" << editEvent << "' method='POST'>";
+  footer << "<div class='modified'>Warning: This event has been modified</div>";
+  footer << "<input type='hidden' name='id' class='event-id' />";
+  footer << "<input type='hidden' name='uid' class='uid' />";
+  footer << "<label>Event Name</label><br />";
+  footer << "<input type='text' name='name' class='event-name' /><br />";
+  footer << "<label>Event Date &amp; Time <br />(YYYY-MM-DD HH:MM)</label><br />";
+  footer << "<input type='text' name='datetime' class='event-datetime' /><br />";
+  footer << "<input type='submit' value='Submit' class='submit' />";
+  footer << "</form></div>";
+  footer << "<div id='create-event' class='form-div'>";
+  footer << "<h3>Create New Event</h3>";
+  footer << "<form action='" << createEvent << "' method='POST'>";
+  footer << "<input type='hidden' name='uid' class='uid' />";
+  footer << "<label>Event Name</label><br />";
+  footer << "<input type='text' name='name' class='event-name' /><br />";
+  footer << "<label>Event Date &amp; Time <br />(YYYY-MM-DD HH:MM)</label><br />";
+  footer << "<input type='text' name='datetime' class='event-datetime' /><br />";
+  footer << "<label>Group Name (optional)</label><br />";
+  footer << "<input type='text' name='group-name' class='group-name' /><br />";
+  footer << "<input type='submit' value='Submit' class='submit' />";
+  footer << "</form></div></body></html>";
+
+  footer >> footerString;
+  return footerString;
+}
+
+string getHeader(const string username) {
+  string headerString;
+  stringstream header;
+
+  header << "<html><head><title>Collab Cal</title>";
+  header << "<script src='http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js'></script>";
+  header << "<script src='scripts.js'></script>";
+  header << "<link rel='stylesheet' type='text/css' href='style.css'>";
+  header << "</head><body>";
+
+  long userID = userIdByName(username);
+  string newGroup   = "#";
+  string addToGroup = "#";
+
+  header << "<p id='user'>Logged in as <span class='username'>" << username;
+  header << "</span><span class='id'>" << userID << "</span>";
+  header << "<span class='groups'>(group actions)</span></p>";
+  header << "<div id='groups'><div class='make-group form-div'>";
+  header << "<h3>Create New Group</h3>";
+  header << "<form action='" << newGroup << "' method='POST'>";
+  header << "<input type='hidden' name='uid' class='uid' />";
+  header << "<label>Group Name</label><br />";
+  header << "<input type='text' name='group-name' class='group-name' /><br />";
+  header << "<input type='submit' value='Create' class='submit' />";
+  header << "</form></div>";
+  header << "<div class='add-to-group form-div'>";
+  header << "<h3>Add User to Group</h3>";
+  header << "<form action='" << addToGroup << "' method='POST'>";
+  header << "<input type='hidden' name='uid' class='uid' />";
+  header << "<label>Group Name</label><br />";
+  header << "<input type='text' name='group-name' class='group-name' /><br />";
+  header << "<label>Username of User to Add</label><br />";
+  header << "<input type='text' name='added-name' class='added-name' /><br />";
+  header << "<label>Make Admin?</label><br />";
+  header << "<input type='checkbox' name='make-admin' class='make-admin' /><br />";
+  header << "<input type='submit' value='Add' class='submit' />";
+  header << "</form></div></div>";
+
+  header >> headerString;
+  return headerString;
+}
+
+string getLogin() {
+  string loginString;
+  stringstream login;
+
+  login << "<html><head><title>Collab Cal</title>";
+  login << "<script src='http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js'></script>";
+  login << "<script src='scripts.js'></script>";
+  login << "<link rel='stylesheet' type='text/css' href='style.css'>";
+  login << "</head><body>";
+
+  string loginURL = "#";
+  string newUser  = "#";
+
+  login << "<div id='container'><h1>Collab Cal!</h1><div id='login-div'>";
+  login << "<form action='" << loginURL << "' method='POST'>";
+  login << "<label>Username</label><br />";
+  login << "<input type='text' name='username' class='username' /><br />";
+  login << "<label>Password</label><br />";
+  login << "<input type='password' name='password' class='password' /><br />";
+  login << "<input type='submit' value='Log In' class='login' /></form></div>";
+  login << "<p class='register-link'><span>Or Create a New Account</span></p>";
+  login << "<div id='register-div'>";
+  login << "<form action='" << newUser << "' method='POST'>";
+  login << "<label>Username</label><br />";
+  login << "<input type='text' name='username' class='username' /><br />";
+  login << "<label>Password</label><br />";
+  login << "<input type='password' name='password' class='password' /><br />";
+  login << "<input type='submit' value='Create' class='login' />";
+  login << "</form></div></div></body></html>";
+
+  login >> loginString;
+  return loginString;
+}
+
 
 
 
