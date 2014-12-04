@@ -1,5 +1,5 @@
-OBJECTS=calenderServer.o event.o user.o group.o objectCache.o serverFiles.o
-HEADERS=calenderServer.h event.h user.h group.h objectCache.h serverFiles.h
+OBJECTS=calenderServer.o event.o user.o group.o objectCache.o serverFiles.o serverActions.o
+HEADERS=calenderServer.h event.h user.h group.h objectCache.h serverFiles.h serverActions.h
 COMPILE=g++ -g -std=c++11 -Wall -c
 LINK=g++ -g -std=c++11
 
@@ -25,3 +25,6 @@ objectCache.o: objectCache.cpp objectCache.h serverFiles.h
 
 serverFiles.o: serverFiles.cpp serverFiles.h
 	$(COMPILE) -o serverFiles.o serverFiles.cpp
+
+serverActions.o: serverActions.cpp serverActions.h group.h event.h user.h
+	$(COMPILE) -o serverActions.o serverActions.cpp

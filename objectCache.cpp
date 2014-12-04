@@ -168,3 +168,42 @@ void dumpCache(){
 	     entry.second->item->writeToFile(eventFileMap[entry.first]);
 	   });
 }
+
+/* These lookup functions allow you to get object ID's by name. */
+
+long userIdByName(const string &username){
+  for(auto it = userFileMap.begin(); it != userFileMap.end(); ++it){
+    if (it->second.substr(userDir.length()) == username)
+      return it->first;
+  }
+  return -1;
+}
+
+long groupIdByName(const string &name){
+  for(auto it = groupFileMap.begin(); it != groupFileMap.end(); ++it){
+    auto checkingGroup = acquireGroup(it->first);
+    if (checkingGroup->getName() == name)
+      return checkingGroup->getID();
+  }
+  return -1;
+}
+
+long eventIdByName(const string &name){
+  for(auto it = eventFileMap.begin(); it != groupFileMap.end(); ++it){
+    auto checkingEvent = acquireEvent(it->first);
+    if (checkingEvent->getName() == name)
+      return checkingEvent->getID();
+  }
+  return -1;
+}
+
+long eventIdByName(const long userID, const string &name){
+  auto user = acquireUser(userID);
+  list<long>* eventIDs = user->getEventIDs();
+  for(auto it = eventIDs->begin(); it != eventIDs->end(); ++it){
+    auto checkingEvent = acquireEvent(*it);
+    if (checkingEvent->getName() == name)
+      return checkingEvent->getID();
+  }
+  return -1;
+}

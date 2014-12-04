@@ -29,4 +29,19 @@ lockptr<Group> acquireGroup(const long groupID);
 lockptr<Event> acquireEvent(const long eventID);
 void dumpCache();
 
+/*===============================================
+  Helper Functions.
+  ===============================================*/
+
+/* Given the name of a user, group, or event, lets you get it's ID.
+   Returns -1 if it couldn't be found. These are linear in the number
+   we have, so avoid using them if possible.*/
+long userIdByName(const std::string &username);
+long groupIdByName(const std::string &name);
+long eventIdByName(const std::string &name);
+
+/* This version scales better, since it only searches through the
+   events that the user has access to. */
+long eventIdByName(const long userID, const std::string &name);
+
 #endif
