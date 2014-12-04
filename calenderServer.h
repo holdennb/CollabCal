@@ -1,6 +1,7 @@
 #include "user.h"
 #include "group.h"
 #include "event.h"
+#include "locking_pointer.h"
 #include <string>
 #include <list>
 
@@ -126,12 +127,17 @@ long eventIdByName(const std::string &name);
    events that the user has access to. */
 long eventIdByName(const long userID, const std::string &name);
 
-/* Gets the object cooresponding to a user, group, or event ID.
-   The pointer returned is owned by the internals of this module,
-   so don't try and free it, and it may become invalid upon
-   the next call to the cooresponding function,
-   so don't try to store it. If you need to store something,
-   just store the ID, and look it up again later. */
-User* lookupUser(const long userID);
-Group* lookupGroup(const long groupID);
-Event* lookupEvent(const long eventID);
+/* Gets the object cooresponding to a user, group, or event ID.  The
+   pointer returned is owned by the internals of this module, so don't
+   try and free it, and it may become invalid upon the next call to
+   the cooresponding function, so don't try to store it. If you need
+   to store something, just store the ID, and look it up again
+   later. Remember to release the object when you're done, so others
+   can use it.*/
+lockptr<User> acquireUser(const long userID);
+lockptr<Group> acquireGroup(const long groupID);
+lockptr<Event> acquireEvent(const long eventID);
+
+void releaseUser(const long userID);
+void releaseGroup(const long userID);
+void releaseEvent(const long userID);
