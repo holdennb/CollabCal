@@ -387,35 +387,6 @@ list<long>* getEvents(const long userID){
   return user->getEventIDs();
 }
 
-// Construct JSON string of a user's events
-string getEventsJson(const long userID) {
-  list<long>* events = getEvents(userID);
-  string jsonString;
-  std::stringstream json;
-  json << "[";
-  for (long eventID: *events) {
-    Event* event = lookupEvent(eventID);
-    json << "{";
-    json << "\"id\": \"" << event->getID() << "\",";
-    json << "\"name\": \"" << event->getName() << "\",";
-    time_t time = event->getTime();
-    struct tm * timeinfo = localtime(&time);
-    json << "\"year\": \"" << (timeinfo->tm_year + 1900) << "\",";
-    json << "\"day\": \"" << timeinfo->tm_mday << "\",";
-    // 24 hour time
-    json << "\"time\": \"" << timeinfo->tm_hour << ":";
-    if (timeinfo->tm_min < 10) {
-      json << "0" << timeinfo->tm_min << "\"";
-    } else {
-      json << timeinfo->tm_min << "\"";
-    }
-    json << "},";
-  }
-  json << "]";
-  json >> jsonString;
-  return jsonString;
-}
-
 long userIdByName(const string &username){
   for(auto it = userFileMap.begin(); it != userFileMap.end(); ++it){
     if (it->second.substr(userDir.length()) == username)
