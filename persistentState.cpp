@@ -10,6 +10,7 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
+#include <signal.h>
 
 using namespace std;
 
@@ -73,7 +74,16 @@ void saveFileIndices(){
   eventFile.close();
 }
 
+void interruptHandler(int s){ shutdown(); exit(0); }
+
 void init(){
+  // Catch interrupts and save state properly.
+  struct sigaction sigIntHandler;
+  sigIntHandler.sa_handler = interruptHandler;
+  sigemptyset(&sigIntHandler.sa_mask);
+  sigIntHandler.sa_flags = 0;
+  sigaction(SIGINT, &sigIntHandler, NULL);
+
   parseUserFile();
   parseEventFile();
   parseGroupFile();
