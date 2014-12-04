@@ -1,6 +1,14 @@
 #include "renderPage.h"
+#include "user.h"
+#include "group.h"
+#include "event.h"
+#include "serverActions.h"
+#include "objectCache.h"
 #include <string>
 #include <time.h>
+#include <sstream>
+
+using namespace std;
 
 /* Construct JSON string of a user's events */
 string getEventsJson(const long userID) {
@@ -9,12 +17,12 @@ string getEventsJson(const long userID) {
   stringstream json;
   json << "[";
   for (long eventID: *events) {
-    Event* event = lookupEvent(eventID);
+    auto event = acquireEvent(eventID);
     json << "{";
     json << "\"id\": \"" << event->getID() << "\",";
     json << "\"name\": \"" << event->getName() << "\",";
     time_t time = event->getTime();
-    struct tm * timeInfo = localtime(&time);
+    struct tm * timeinfo = localtime(&time);
     json << "\"year\": \"" << (timeinfo->tm_year + 1900) << "\",";
     json << "\"day\": \"" << timeinfo->tm_mday << "\",";
     // 24 hour time
@@ -37,8 +45,8 @@ string getEmptyCalendar() {
   time (&curTime);
   struct tm* timeInfo = localtime(&curTime);
   int year = timeInfo->tm_year + 1900;
-  int monthNum = timeInfo->tm_month;
-  int today = timeinfo->tm_mday;
+  int monthNum = timeInfo->tm_mon;
+  int today = timeInfo->tm_mday;
   int dayOfWeek = timeInfo->tm_wday;
 
   // Calculate the day of the week of the 1st
@@ -46,9 +54,9 @@ string getEmptyCalendar() {
 
   // Calculate the length of the month
   int monthLength = 31;
-  if (month == 4 || month == 6 || month == 9 || month == 11) { 
+  if (monthNum == 4 || monthNum == 6 || monthNum == 9 || monthNum == 11) { 
     monthLength = 30;
-  } else if (month == 2) {
+  } else if (monthNum == 2) {
     bool isLeapYear = (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
     monthLength = (isLeapYear ? 29 : 28);
   }
@@ -128,7 +136,7 @@ string getFooter() {
   return footerString;
 }
 
-string getHeader(const string username) {
+string getHeader(const string &username) {
   string headerString;
   stringstream header;
 

@@ -1,6 +1,7 @@
 #include "serverActions.h"
 #include "objectCache.h"
 #include "serverFiles.h"
+#include "renderPage.h"
 #include <iostream>
 #include <chrono>
 #include <random>

@@ -1,4 +1,4 @@
-OBJECTS=calenderServer.o event.o user.o group.o objectCache.o serverFiles.o serverActions.o persistentState.o
+OBJECTS=calenderServer.o event.o user.o group.o objectCache.o serverFiles.o serverActions.o persistentState.o renderPage.o
 COMPILE=g++ -g -std=c++11 -Wall -c
 LINK=g++ -g -std=c++11
 
@@ -7,7 +7,7 @@ all: calenderServer
 calenderServer: $(OBJECTS)
 	$(LINK) -o calenderServer $(OBJECTS)
 
-calenderServer.o: calenderServer.cpp calenderServer.h serverFiles.h serverActions.h persistentState.h
+calenderServer.o: calenderServer.cpp calenderServer.h serverFiles.h serverActions.h persistentState.h renderPage.h
 	$(COMPILE) -o calenderServer.o calenderServer.cpp
 
 event.o: event.cpp event.h
@@ -30,3 +30,6 @@ serverActions.o: serverActions.cpp serverActions.h group.h event.h user.h
 
 persistentState.o: persistentState.cpp persistentState.h objectCache.h serverFiles.h group.h event.h user.h
 	$(COMPILE) -o persistentState.o persistentState.cpp
+
+renderPage.o: renderPage.cpp renderPage.h group.h event.h user.h serverActions.h
+	$(COMPILE) -o renderPage.o renderPage.cpp
