@@ -1,2 +1,5 @@
 *.o
 calenderServer
+groups*
+users*
+events*
