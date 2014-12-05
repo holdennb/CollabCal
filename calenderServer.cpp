@@ -2,20 +2,24 @@
 #include "serverActions.h"
 #include "persistentState.h"
 #include <iostream>
-#include <sys/types>
+#include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
+#include <thread>
+#include <algorithm>
+#include <string.h>
+#include <unistd.h>
 
 using namespace std;
 
 int main(int argc, char** argv){
   // Grab the port number from the command line, handling bad inputs.
   int portNum;
-  if (argc != 0)
+  if (argc != 2)
     printUsageAndExit();
 
   try{
-    portNum = stoi(argv[0]);
+    portNum = stoi(argv[1]);
   } catch(invalid_argument e){
     cerr << "Not a valid number!" << endl;
     printUsageAndExit();
@@ -50,7 +54,7 @@ void serverListen(int portNum){
   // Lots of structure set up.
   struct addrinfo hints;
   struct addrinfo* serverInfo;
-  char[6] portBuf;
+  char portBuf[6];
   int listenSocket;
   
   memset(&hints, 0, sizeof(hints));
@@ -91,6 +95,7 @@ void serverListen(int portNum){
 void listenLoop(int listenSocket){
   struct sockaddr_storage clientAddr;
   socklen_t cAddrSize = sizeof(clientAddr);
+  list<thread> clientThreads;
   int clientSocket;
 
   while(true){
@@ -98,9 +103,53 @@ void listenLoop(int listenSocket){
       cerr << "Failed to accept client." << endl;
       continue;
     }
-    handleClient(clientSocket);
+    clientThreads.push_front(thread(handleClient, clientSocket));
   }
 }
-
+const int BUFFERSIZE = 513;
 void handleClient(int clientSocket){
+  // Buffer to hold part of the request.
+  char requestBuffer[BUFFERSIZE];
+  // c++ strings for the request and response.
+  string request;
+  string response;
+  // How many bytes we received this call.
+  int bytesReceived;
+  // How many bytes we've sent total.
+  unsigned bytesSent;
+  // How many bytes we've sent this call.
+  int sending;
+
+  while(true){
+    // Recieve a single request.
+    bytesReceived = recv(clientSocket, requestBuffer, BUFFERSIZE, 0);
+    while(bytesReceived == BUFFERSIZE){
+      request.append(requestBuffer);
+      bytesReceived = recv(clientSocket, requestBuffer, BUFFERSIZE, 0);
+    }
+    if (bytesReceived <= 0) break;
+
+    // Get the response.
+    response = handleRequest(request);
+
+    // Reply
+    bytesSent = 0;
+    while(bytesSent < response.length()){
+      sending = send(clientSocket, response.c_str(), response.length(), 0);
+      if (sending == -1){
+	cerr << "Failed to respond to client. " << endl;
+	break;
+      }
+      bytesSent += sending;
+    }
+
+    // If the client didn't close the connection, we'll reply
+    // again. Otherwise, we'll just try to receive andf then break.
+  }
+  
+  close(clientSocket);
+}
+
+string handleRequest(const string& request){
+  return "";
 }
