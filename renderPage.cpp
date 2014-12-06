@@ -12,7 +12,7 @@
 using namespace std;
 
 /* Construct JSON string of a user's events */
-string getEventsJson(const long userID) {
+const string getEventsJson(const long userID) {
   list<long>* events = getEvents(userID);
   string jsonString;
   stringstream json;
@@ -41,7 +41,7 @@ string getEventsJson(const long userID) {
 }
 
 /* Returns HTML for the initial calendar, based off the current time */
-string getEmptyCalendar() {
+const string getEmptyCalendar() {
   time_t curTime;
   time (&curTime);
   struct tm* timeInfo = localtime(&curTime);
@@ -102,7 +102,7 @@ string getEmptyCalendar() {
   return calString;
 }
 
-string getFooter() {
+const string getFooter() {
   string footerString;
   stringstream footer;
   string editEvent   = "#";
@@ -137,7 +137,7 @@ string getFooter() {
   return footerString;
 }
 
-string getHeader(const string &username) {
+const string getHeader(const string &username) {
   string headerString;
   stringstream header;
 
@@ -179,7 +179,7 @@ string getHeader(const string &username) {
   return headerString;
 }
 
-string getLogin() {
+const string getLogin() {
   string loginString;
   stringstream login;
 
@@ -213,13 +213,13 @@ string getLogin() {
   return loginString;
 }
 
-string getResponseHeader(const string &firstline, const map<string, string>* reqHeaders,
+const string getResponseHeader(const string &firstline, const map<string, string>* reqHeaders,
    const int contentLength) {
   string headerString;
   stringstream header;
 
   header << firstline << "\r\n";
-  for (auto& pair: reqHeaders) {
+  for (auto& pair: *reqHeaders) {
     header << pair.first << ": " << pair.second << "\r\n";
   }
   header << "Content-Length: " << contentLength << "\r\n";

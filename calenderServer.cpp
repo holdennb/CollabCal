@@ -2,13 +2,14 @@
 #include "serverActions.h"
 #include "persistentState.h"
 #include "renderPage.h"
+#include "objectCache.h"
 #include <iostream>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
 #include <thread>
 #include <algorithm>
-#include <string.h>
+#include <string>
 #include <unistd.h>
 #include <vector>
 #include <map>
@@ -193,8 +194,8 @@ map<string, string>* parseRequest(const string& request) {
   return headers;
 }
 
-string handleGet(const map<string, string>* reqHeaders) {
-  string uid = -1;
+string handleGet(map<string, string>* reqHeaders) {
+  long uid = -1;
   string uri = (*reqHeaders)["uri"];
 
   if (reqHeaders->count("cookie") != 0) {
@@ -211,7 +212,7 @@ string handleGet(const map<string, string>* reqHeaders) {
     // cal page
     string username = userNameById(uid);
     body = getHeader(username);
-    body += getEmptyCalender();
+    body += getEmptyCalendar();
     body += getFooter();
 
   } else if (uri.compare("getEvents") == 0 && uid != -1) {
@@ -225,7 +226,7 @@ string handleGet(const map<string, string>* reqHeaders) {
   return body + getResponseHeader("HTTP/1.1 200 OK", reqHeaders, body.size());
 }
 
-string handlePost(const map<string, string>* reqHeaders) {
+string handlePost(map<string, string>* reqHeaders) {
 
   return "";
 }

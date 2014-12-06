@@ -18,6 +18,6 @@ std::string handleRequest(const std::string& request);
 
 std::map<std::string, std::string>* parseRequest(const std::string& request);
 
-std::string handleGet(const std::map<std::string, std::string>* reqHeaders);
+std::string handleGet(std::map<std::string, std::string>* reqHeaders);
 
-std::string handlePost(const std::map<std::string, std::string>* reqHeaders);
+std::string handlePost(std::map<std::string, std::string>* reqHeaders);

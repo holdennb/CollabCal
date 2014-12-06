@@ -171,7 +171,7 @@ void dumpCache(){
 
 /* These lookup functions allow you to get object fields. */
 
-string userNameById(const long &userID){
+string userNameById(const long userID){
   for(auto it = userFileMap.begin(); it != userFileMap.end(); ++it){
     if (it->first == userID)
       return it->second.substr(userDir.length());

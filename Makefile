@@ -1,6 +1,6 @@
 OBJECTS=calenderServer.o event.o user.o group.o objectCache.o serverFiles.o serverActions.o persistentState.o renderPage.o
-COMPILE=g++ -g -std=c++11 -Wall -c
-LINK=g++ -g -std=c++11
+COMPILE=g++ -g -std=c++11 -Wall -c -pthread
+LINK=g++ -g -std=c++11 -pthread
 
 all: calenderServer
 
