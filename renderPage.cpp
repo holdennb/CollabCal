@@ -5,6 +5,7 @@
 #include "serverActions.h"
 #include "objectCache.h"
 #include <string>
+#include <map>
 #include <time.h>
 #include <sstream>
 
@@ -210,6 +211,20 @@ string getLogin() {
 
   login >> loginString;
   return loginString;
+}
+
+string getResponseHeader(const string &firstline, const map<string, string>* reqHeaders,
+   const int contentLength) {
+  string headerString;
+  stringstream header;
+
+  header << firstline << "\r\n";
+  for (auto& pair: reqHeaders) {
+    header << pair.first << ": " << pair.second << "\r\n";
+  }
+  header << "Content-Length: " << contentLength << "\r\n";
+  header >> headerString;
+  return headerString;
 }
 
 

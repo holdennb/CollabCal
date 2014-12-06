@@ -20,3 +20,11 @@ Authentication:
 
 
 —editing form underneath calendar at first, hidden event id form item populated by JS based on selected event
+
+/cal (login w/o session, cal page with) GET
+/getEvents GET
+/login POST
+/createEvent POST
+/editEvent POST
+/createGroup POST
+/addToGroup POST

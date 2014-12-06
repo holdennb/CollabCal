@@ -33,6 +33,10 @@ void dumpCache();
   Helper Functions.
   ===============================================*/
 
+/* Given a user ID, returns the username. Returns empty string
+   if it can't be found. */
+std::string userNameById(const long userID);
+
 /* Given the name of a user, group, or event, lets you get it's ID.
    Returns -1 if it couldn't be found. These are linear in the number
    we have, so avoid using them if possible.*/

@@ -1,6 +1,7 @@
 #include "calenderServer.h"
 #include "serverActions.h"
 #include "persistentState.h"
+#include "renderPage.h"
 #include <iostream>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -9,7 +10,10 @@
 #include <algorithm>
 #include <string.h>
 #include <unistd.h>
-
+#include <vector>
+#include <map>
+#include <boost/algorithm/string.hpp>
+  
 using namespace std;
 
 int main(int argc, char** argv){
@@ -137,8 +141,8 @@ void handleClient(int clientSocket){
     while(bytesSent < response.length()){
       sending = send(clientSocket, response.c_str(), response.length(), 0);
       if (sending == -1){
-	cerr << "Failed to respond to client. " << endl;
-	break;
+  cerr << "Failed to respond to client. " << endl;
+  break;
       }
       bytesSent += sending;
     }
@@ -151,5 +155,91 @@ void handleClient(int clientSocket){
 }
 
 string handleRequest(const string& request){
+
+  map<string, string>* reqHeaders = parseRequest(request);
+
+  if ((*reqHeaders)["uri"].compare("get") == 0) {
+    return handleGet(reqHeaders);
+  } else if ((*reqHeaders)["uri"].compare("post") == 0) {
+    return handlePost(reqHeaders);
+  } else {
+    // should make 404
+    return "ERROR";
+  }
+}
+
+map<string, string>* parseRequest(const string& request) {
+  map<string, string>* headers = new map<string, string>();
+
+  string delim = "\r\n";
+  vector<string> lines;
+  boost::iter_split(lines, request,
+                    boost::first_finder(delim, boost::is_iequal()));
+
+  (*headers)["method"] = lines[0].substr(0, lines[0].find(" "));
+  lines[0] = lines[0].substr(lines[0].find(" ") + 1);
+  (*headers)["uri"] = lines[0].substr(0, lines[0].find(" "));
+  for (size_t i = 1; i < lines.size(); i++) {
+    if (lines[i].compare("") == 0) {
+      break;
+    }
+    int mid = lines[i].find(": ");
+    string name = lines[i].substr(0, mid);
+    string val = lines[i].substr(mid+2, string::npos);
+    transform(val.begin(), val.end(), val.begin(), ::tolower);
+    (*headers)[name] = val;
+  }
+
+  return headers;
+}
+
+string handleGet(const map<string, string>* reqHeaders) {
+  string uid = -1;
+  string uri = (*reqHeaders)["uri"];
+
+  if (reqHeaders->count("cookie") != 0) {
+    string cookies = (*reqHeaders)["cookie"];
+    string uidString = cookies.substr(cookies.find("="), cookies.find(";"));
+    uid = stoi(uidString, nullptr);
+  }
+
+  string body;
+  if (uri.compare("cal") == 0 && uid == -1) {
+    // login page
+    body = getLogin();
+  } else if (uri.compare("cal") == 0 && uid != -1) {
+    // cal page
+    string username = userNameById(uid);
+    body = getHeader(username);
+    body += getEmptyCalender();
+    body += getFooter();
+
+  } else if (uri.compare("getEvents") == 0 && uid != -1) {
+    // getEvents, has uid
+    body = getEventsJson(uid);
+
+  } else {
+    // should make 404
+    return "ERROR";
+  }
+  return body + getResponseHeader("HTTP/1.1 200 OK", reqHeaders, body.size());
+}
+
+string handlePost(const map<string, string>* reqHeaders) {
+
   return "";
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
