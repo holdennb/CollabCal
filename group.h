@@ -62,9 +62,13 @@ class Group{
   /*
      Write the group to a file with the given filename, overwriting
      any data that was previously in the file.  A group file consists
-     of a line containing the group id, followed by a line for each
-     user in the group containing the users id, followed by a space
-     and a w if the user can write to the group.
+     of:
+
+     * a line containing the group id,
+     * followed by a line with the group name.
+     * followed by a line for each user in the group containing:
+     * * the users id,
+     * * followed by a space and a w if the user can write to the group.
   */
   bool writeToFile(const std::string &filename) const;
   /*

@@ -69,6 +69,7 @@ bool Group::writeToFile (const string &filename) const {
   file.open(filename);
   if(file.fail())
     return false;
+  file << name << endl;
   file << id << endl;
   for_each(userInfos.begin(), userInfos.end(),
 	   [&file](pair<long,bool> userInfo){
@@ -93,6 +94,10 @@ Group* Group::readFromFile(const string &filename){
   // Open the file
   file.open(filename);
   if(file.fail())
+    return nullptr;
+
+  // Read the groupName line.
+  if(!getline(file,name))
     return nullptr;
 
   // Read the group ID
