@@ -60,18 +60,18 @@ class Group{
      you have to do that separately. */
   void removeEvent(const long eventID);
   /*
-     Write the group to a file with the given filename,
-     overwriting any data that was previously in the file.
-     A group file consists of a line containing the group id,
-     followed by a line for each user in the group containing
-     the users id.
+     Write the group to a file with the given filename, overwriting
+     any data that was previously in the file.  A group file consists
+     of a line containing the group id, followed by a line for each
+     user in the group containing the users id, followed by a space
+     and a w if the user can write to the group.
   */
   bool writeToFile(const std::string &filename) const;
   /*
-     Read out a Group object from the file with the given
-     filename, returning a pointer to that object.
-     Returns nullptr if the file does not exist, or could not be read.
-     The client is responsible for deleting the result.
+     Read out a Group object from the file with the given filename,
+     returning a pointer to that object.  Returns nullptr if the file
+     does not exist, or could not be read.  The client is responsible
+     for deleting the result.
   */
   static Group* readFromFile(const std::string &filename);
 };
