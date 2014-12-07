@@ -302,7 +302,7 @@ const string getExtras() {
         "url : formURL,\n"
         "type: 'POST',\n"
         "data : postData,\n"
-        "contentType: 'text/html',\n"
+        "contentType: 'text/plain; charset=US-ASCII',\n"
         "dataType: 'text',\n"
         "success: function(data, textStatus, jqXHR) {\n"
         "},\n"
