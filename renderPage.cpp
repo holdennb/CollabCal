@@ -40,7 +40,9 @@ const string getEventsJson(const long userID) {
   }
 
   string jsonString = json.str();
-  jsonString = jsonString.substr(0, jsonString.size()-1);
+  if (events->size() > 0) {
+    jsonString = jsonString.substr(0, jsonString.size()-1);
+  }
   return jsonString + "]";
 }
 
@@ -51,8 +53,9 @@ const string getEmptyCalendar() {
   struct tm* timeInfo = localtime(&curTime);
   int year = timeInfo->tm_year + 1900;
   int monthNum = timeInfo->tm_mon;
-  int today = timeInfo->tm_mday;
-  int dayOfWeek = timeInfo->tm_wday;
+  int today = timeInfo->tm_mday + 1;
+  int dayOfWeek = timeInfo->tm_wday + 1;
+  cout << "today is " << year << "-" << monthNum << "-" << today << ", hour " << timeInfo->tm_hour << endl;
 
   // Calculate the day of the week of the 1st
   int startDayOfWeek = (dayOfWeek - (today % 7) + 8) % 7;
@@ -117,19 +120,22 @@ const string getFooter() {
   footer << "<label>Event Name</label><br />";
   footer << "<input type='text' name='name' class='event-name' /><br />";
   footer << "<label>Event Date &amp; Time <br />(YYYY-MM-DD HH:MM)</label><br />";
-  footer << "<input type='text' name='datetime' class='event-datetime' /><br />";
-  footer << "<input type='submit' value='Submit' class='submit' />";
-  footer << "</form></div>";
+  footer << "<input type='text' class='event-datetime' /><br />";
+  footer << "<input type='hidden' name='datetime' class='timestamp'/><br />";
+  footer << "<input type='submit' value='Submit' class='submit' /><br />";
+  footer << "<span class='message'></span></form></div>";
   footer << "<div id='create-event' class='form-div'>";
   footer << "<h3>Create New Event</h3>";
   footer << "<form action='" << createEvent << "' method='POST'>";
   footer << "<label>Event Name</label><br />";
   footer << "<input type='text' name='name' class='event-name' /><br />";
   footer << "<label>Event Date &amp; Time <br />(YYYY-MM-DD HH:MM)</label><br />";
-  footer << "<input type='text' name='datetime' class='event-datetime' /><br />";
+  footer << "<input type='text' class='event-datetime' /><br />";
+  footer << "<input type='hidden' name='datetime' class='timestamp'/><br />";
   footer << "<label>Group Name (optional)</label><br />";
   footer << "<input type='text' name='group-name' class='group-name' /><br />";
-  footer << "<input type='submit' value='Submit' class='submit' />";
+  footer << "<input type='submit' value='Submit' class='submit' /><br />";
+  footer << "<span class='message'></span>";
   footer << "</form></div></body></html>";
 
   return footer.str();
@@ -155,7 +161,8 @@ const string getHeader(const string &username) {
   header << "<form action='" << newGroup << "' method='POST'>";
   header << "<label>Group Name</label><br />";
   header << "<input type='text' name='group-name' class='group-name' /><br />";
-  header << "<input type='submit' value='Create' class='submit' />";
+  header << "<input type='submit' value='Create' class='submit' /><br />";
+  header << "<span class='message'></span>";
   header << "</form></div>";
   header << "<div class='add-to-group form-div'>";
   header << "<h3>Add User to Group</h3>";
@@ -166,7 +173,8 @@ const string getHeader(const string &username) {
   header << "<input type='text' name='added-name' class='added-name' /><br />";
   header << "<label>Make Admin?</label><br />";
   header << "<input type='checkbox' name='make-admin' class='make-admin' /><br />";
-  header << "<input type='submit' value='Add' class='submit' />";
+  header << "<input type='submit' value='Add' class='submit' /><br />";
+  header << "<span class='message'></span>";
   header << "</form></div></div>";
 
   return header.str();
@@ -198,7 +206,8 @@ const string getLogin() {
   login << "<input type='text' name='username' class='username' /><br />";
   login << "<label>Password</label><br />";
   login << "<input type='password' name='password' class='password' /><br />";
-  login << "<input type='submit' value='Create' class='login' />";
+  login << "<input type='submit' value='Create' class='login' /><br />";
+  login << "<span class='message'></span>";
   login << "</form></div></div></body></html>";
 
   return login.str();
@@ -229,16 +238,18 @@ const string getExtras() {
 "$('#groups').toggle();\n"
 "});\n"
 "$('.form-div input.uid').val($('#user').find('.id').text());\n"
-"$('.event').click(function() {\n"
+"$(document.body).on('click', '.event', function() {\n"
+"console.log('event clicked');\n"
 "$('#table-div .event').removeClass('active');\n"
 "$(this).addClass('active');\n"
 "$('#edit-event .modified').hide();\n"
-"$(\"#edit-event input[name='name']\").val($(this).find('.name').text());\n"
+"$('#edit-event .message').text('');\n"
+"$('#edit-event input.event-name').val($(this).find('.name').text());\n"
 "var month = $('#month').attr('data-value');\n"
 "var day = $(this).parent().find('.day-num').text();\n"
 "var time = $(this).find('.time').text();\n"
 "var hour = time.substring(0, time.indexOf(':'));\n"
-"$(\"#edit-event input[name='datetime']\")\n"
+"$('#edit-event input.event-datetime')\n"
 ".val($('#year').text() + '-' + (month < 10 ? '0' + month : month)\n"
 "+ '-' + (day < 10 ? '0' + day : day)\n"
 "+ ' ' + (hour < 10 ? '0' + time : time));\n"
@@ -246,8 +257,8 @@ const string getExtras() {
 "$('#edit-event').show();\n"
 "});\n"
 "$('.logout').click(function() {\n"
-"document.cookie = 'sessionId=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';"
-"location.reload();});"
+"document.cookie = 'sessionId=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';\n"
+"location.reload();});\n"
 "$('#register-div form').submit(function(e) {\n"
 "var postData = $(this).serializeArray();\n"
     "var formURL = $(this).attr('action');\n"
@@ -256,10 +267,10 @@ const string getExtras() {
         "type: 'POST',\n"
         "data : postData,\n"
         "success: function(data, textStatus, jqXHR) {\n"
-        "console.log(data + ' ' + textStatus);\n"
+            "$('#register-div form').find('.message').text(data);\n"
         "},\n"
         "error: function(jqXHR, textStatus, errorThrown) {\n"
-        "console.log(data + ' ' + textStatus);\n"
+            "$('#register-div form').find('.message').text(textStatus);\n"
         "}\n"
     "});\n"
     "e.preventDefault();\n"
@@ -272,16 +283,20 @@ const string getExtras() {
         "type: 'POST',\n"
         "data : postData,\n"
         "success: function(data, textStatus, jqXHR) {\n"
-        "location.reload();\n"
-        "},\n"
-        "error: function(jqXHR, textStatus, errorThrown) {\n"
-        "console.log(data + ' ' + textStatus);\n"
+            "location.reload();\n"
         "}\n"
     "});\n"
     "e.preventDefault();\n"
     "e.unbind();});\n"
 "$('#edit-event form').submit(function(e) {\n"
-"var postData = $(this).serializeArray();\n"
+"var datetime = $(this).children('input.event-datetime').val();\n"
+    "var dateAndTime = datetime.split(' ');\n"
+    "var dateParts = dateAndTime[0].split('-');\n"
+    "var timeParts = dateAndTime[1].split(':');\n"
+	"var dateObject = new Date(dateParts[0], dateParts[1] - 1,\n"
+		"dateParts[2], timeParts[0], timeParts[1]);\n"
+	"$(this).children('input.timestamp').val(dateObject.getTime() / 1000);\n"
+    "var postData = $(this).serializeArray();\n"
     "var formURL = $(this).attr('action');\n"
     "$.ajax({\n"
         "url : formURL,\n"
@@ -289,24 +304,37 @@ const string getExtras() {
         "data : postData,\n"
         "contentType: 'text/plain',\n"
         "success: function(data, textStatus, jqXHR) {\n"
+            "$('#edit-event form').find('.message').text(data);\n"
+    "$('.event').removeClass('active');\n"
+    "$('#edit-event').hide();\n"
         "},\n"
         "error: function(jqXHR, textStatus, errorThrown) {\n"
+            "$('#edit-event form').find('.message').text(textStatus);\n"
         "}\n"
     "});\n"
     "e.preventDefault();\n"
     "e.unbind();});\n"
 "$('#create-event form').submit(function(e) {\n"
-"var postData = $(this).serializeArray();\n"
+	"var datetime = $(this).children('input.event-datetime').val();\n"
+    "var dateAndTime = datetime.split(' ');\n"
+    "var dateParts = dateAndTime[0].split('-');\n"
+    "var timeParts = dateAndTime[1].split(':');\n"
+	"var dateObject = new Date(dateParts[0], dateParts[1] - 1,\n"
+		"dateParts[2], timeParts[0], timeParts[1]);\n"
+	"$(this).children('input.timestamp').val(dateObject.getTime() / 1000);\n"
+    "var postData = $(this).serialize();\n"
+    "console.log(postData);\n"
     "var formURL = $(this).attr('action');\n"
     "$.ajax({\n"
         "url : formURL,\n"
         "type: 'POST',\n"
         "data : postData,\n"
-        "contentType: 'text/plain; charset=US-ASCII',\n"
-        "dataType: 'text',\n"
+        "contentType: 'text/plain',\n"
         "success: function(data, textStatus, jqXHR) {\n"
+            "$('#create-event form').find('.message').text(data);\n"
         "},\n"
         "error: function(jqXHR, textStatus, errorThrown) {\n"
+            "$('#create-event form').find('.message').text(textStatus);\n"
         "}\n"
     "});\n"
     "e.preventDefault();\n"
@@ -321,10 +349,10 @@ const string getExtras() {
         "data : postData,\n"
         "contentType: 'text/plain',\n"
         "success: function(data, textStatus, jqXHR) {\n"
-        "console.log(data + ' ' + textStatus);\n"
+            "$('#groups .make-group form').find('.message').text(data);\n"
         "},\n"
         "error: function(jqXHR, textStatus, errorThrown) {\n"
-        "console.log(data + ' ' + textStatus);\n"
+            "$('#groups .make-group form').find('.message').text(textStatus);\n"
         "}\n"
     "});\n"
     "e.preventDefault();\n"
@@ -338,8 +366,10 @@ const string getExtras() {
         "data : postData,\n"
         "contentType: 'text/plain',\n"
         "success: function(data, textStatus, jqXHR) {\n"
+            "$('#groups .add-to-group form').find('.message').text(data);\n"
         "},\n"
         "error: function(jqXHR, textStatus, errorThrown) {\n"
+            "$('#groups .add-to-group form').find('.message').text(textStatus);\n"
         "}\n"
     "});\n"
     "e.preventDefault();\n"
@@ -350,30 +380,26 @@ const string getExtras() {
 "}\n"
 "});\n"
 "function poll(){\n"
-    "console.log('poll');\n"
     "$.ajax({ url: '/getEvents', type: 'GET',\n"
     "dataType: 'text', contentType: 'application/json',\n"
     "complete: function(data) {\n"
-      "console.log('got data ' + data.responseText);\n"
       "updateEvents(data);\n"
       "setTimeout(poll, 5000);\n"
     "}});\n"
     "}\n"
 "function updateEvents(response) {\n"
 "var data = JSON.parse(response.responseText);\n"
-"console.log('in updateEvents(), data = ' + JSON.stringify(data));\n"
 "var curYear = parseInt($('#year').text());\n"
 "var curMonth = parseInt($('#month').attr('data-value'));\n"
 "$('#table-div td.real-day .event:not(.active)').remove();\n"
 "var active = $('#table-div td.real-day .event.active');\n"
 "for (var i = 0; i < data.length; i++) {\n"
 "var event = data[i];\n"
-"console.log(JSON.stringify(event));\n"
 "if (event.year == curYear && event.month == curMonth) {\n"
 "if (event.id == active.attr('data-value')\n"
 "&& (active.children('.time').text() != event.time\n"
 "|| active.children('.name').text() != event.name\n"
-"|| active.siblings('day-num').text() != event.day)) {\n"
+"|| active.siblings('.day-num').text() != event.day)) {\n"
 "$('#edit-event .modified').show();\n"
 "} else if (event.id != active.attr('data-value')) {\n"
 "var td = $('#table-div td.real-day.day-' + event.day);\n"

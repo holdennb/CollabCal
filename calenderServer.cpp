@@ -374,23 +374,19 @@ string handlePost(map<string, string>* reqHeaders) {
     
   } else if (uri.compare("/createEvent") == 0 && uid != -1) {
     string params = (*reqHeaders)["params"];
-    cout << "params is '" << params << "'" << endl;
+    cout << "params is '" << params.c_str() << "'" << endl;
     string eventName = params.substr(5, params.find("&") - 5);
     params = params.substr(params.find("&") + 1);
-    string datetime = params.substr(9, params.find("&") - 9);
+    string timeString = params.substr(9, params.find("&") - 9);
     params = params.substr(params.find("&") + 1);
     bool withGroup = params.size() > 11;
 
-    cout << "eName: " << eventName << " dt: " << datetime << " wG: " << withGroup << endl;
+    cout << "eName: " << eventName << " tS: " << timeString << " wG: " << withGroup << endl;
 
-    struct tm * tm;
-    datetime.replace(10, 1, " ");
-    datetime.replace(13, 3, ":");
-    cout << "dt is now " << datetime << endl;
-    strptime(datetime.c_str(), "%Y-%m-%d %H:%M", tm);
-    cout << "y: " << (tm->tm_year + 1900) << " m: " << (tm->tm_mon + 1) << "d: ";
-    cout << tm->tm_mday << "H: " << (tm->tm_hour + 1) << " M: " << tm->tm_min << endl;
-    time_t eventTime = mktime(tm);
+    stringstream timeStream;
+    time_t eventTime;
+    timeStream << timeString;
+    timeStream >> eventTime;
     cout << "time_t is " << eventTime << endl;
 
     long eventId;
@@ -422,15 +418,15 @@ string handlePost(map<string, string>* reqHeaders) {
     params = params.substr(params.find("&") + 1);
     string eventName = params.substr(5, params.find("&") - 5);
     params = params.substr(params.find("&") + 1);
-    string datetime = params.substr(9, params.find("&") - 9);
+    string timeString = params.substr(9, params.find("&") - 9);
 
-    cout << "eID: " << eventId << " eName: " << eventName << " dt: " << datetime << endl;
+    cout << "eID: " << eventId << " eName: " << eventName << " dt: " << timeString << endl;
 
-    struct tm tm;
-    datetime.replace(10, 1, " ");
-    datetime.replace(13, 3, ":");
-    strptime(datetime.c_str(), "%Y-%m-%d %H:%M:%S", &tm);
-    time_t eventTime = mktime(&tm);
+    stringstream timeStream;
+    time_t eventTime;
+    timeStream << timeString;
+    timeStream >> eventTime;
+    cout << "time_t is " << eventTime << endl;
 
     renameEvent(uid, eventId, eventName);
     rescheduleEvent(uid, eventId, eventTime);
