@@ -132,12 +132,14 @@ void handleClient(int clientSocket){
     bytesReceived = recv(clientSocket, requestBuffer, BUFFERSIZE, 0);
     while(bytesReceived == BUFFERSIZE){
       cout << "in recv loop" << endl;
-      request.append(requestBuffer);
-      bytesReceived = recv(clientSocket, requestBuffer, BUFFERSIZE, 0);
+      request.append(requestBuffer, bytesReceived);
+      bytesReceived = recv(clientSocket, requestBuffer, BUFFERSIZE, MSG_DONTWAIT);
     }
     cout << "appending first " << bytesReceived << " bytes of buffer" << endl;
-    request.append(requestBuffer, bytesReceived);
-    if (bytesReceived <= 0) return;
+    if (bytesReceived != -1) {
+      request.append(requestBuffer, bytesReceived);
+    }
+    if (bytesReceived == 0) return;
     // Get the response.
     cout << "about to handle request" << endl;
     response = handleRequest(request);
