@@ -128,16 +128,18 @@ void handleClient(int clientSocket){
 
   //while(true){
     // Recieve a single request.
+  cout << "about to receive request" << endl;
     bytesReceived = recv(clientSocket, requestBuffer, BUFFERSIZE, 0);
     while(bytesReceived == BUFFERSIZE){
+      cout << "in recv loop" << endl;
       request.append(requestBuffer);
       bytesReceived = recv(clientSocket, requestBuffer, BUFFERSIZE, 0);
     }
-    request.append(requestBuffer);
+    cout << "appending first " << bytesReceived << " bytes of buffer" << endl;
+    request.append(requestBuffer, bytesReceived);
     if (bytesReceived <= 0) return;
-    cout << "received " << bytesReceived << " bytes" << endl;
-    cout << "request is '" << request << "'" << endl;
     // Get the response.
+    cout << "about to handle request" << endl;
     response = handleRequest(request);
     //cout << "done handling request, response is " << response << endl;
     // Reply
@@ -154,14 +156,11 @@ void handleClient(int clientSocket){
     // If the client didn't close the connection, we'll reply
     // again. Otherwise, we'll just try to receive andf then break.
     //}
-  cout << "about to close socket" << endl;
   close(clientSocket);
 }
 
 string handleRequest(const string& request){
-  cout << "handling request" << endl;
   map<string, string>* reqHeaders = parseRequest(request);
-  cout << "done parsing" << endl;
   if ((*reqHeaders)["method"].compare("GET") == 0) {
     return handleGet(reqHeaders);
   } else if ((*reqHeaders)["method"].compare("POST") == 0) {
@@ -169,37 +168,30 @@ string handleRequest(const string& request){
   } else {
     // should make 404
     cout << "returning error, method is '" << (*reqHeaders)["method"] << "'" << endl;
-    cout << "headers has size " << reqHeaders->size() << endl;
     return "ERROR";
   }
 }
 
 map<string, string>* parseRequest(const string& request) {
   map<string, string>* headers = new map<string, string>();
-  cout << "parsing request" << endl;
-  cout << "request is '" << request << "'" << endl;
   string delim = "\r\n";
   vector<string> lines;
   boost::iter_split(lines, request,
                     boost::first_finder(delim, boost::is_iequal()));
-  cout << "firstline is '" << lines[0] << "'" << endl;
   string method = lines[0].substr(0, lines[0].find(" "));
   (*headers)["method"] = method;
   lines[0] = lines[0].substr(lines[0].find(" ") + 1);
   (*headers)["uri"] = lines[0].substr(0, lines[0].find(" "));
-  cout << "entering loop" << endl;
   for (size_t i = 1; i < lines.size(); i++) {
     if (method.compare("POST") == 0 && i == lines.size() - 1) {
-      cout << "params is " << lines[i] << endl;
+      //cout << "params is " << lines[i] << endl;
       (*headers)["params"] = lines[i];
-      cout << "headers[params] is " << (*headers)["params"] << endl;
       break;
     } else if (method.compare("GET") == 0 && lines[i].compare("") == 0) {
       break;
     } else if (method.compare("POST") == 0 && lines[i].compare("") == 0) {
       i = lines.size() - 2;
     } else if (method.compare("POST") != 0 || lines[i].compare("") != 0) {
-      cout << "line is: " << lines[i] << endl;
       int mid = lines[i].find(": ");
       string name = lines[i].substr(0, mid);
       string val = lines[i].substr(mid+2, string::npos);
@@ -215,12 +207,9 @@ string handleGet(map<string, string>* reqHeaders) {
   long long sessionId = -1;
   long uid = -1;
   string uri = (*reqHeaders)["uri"];
-  cout << "handling get" << endl;
   if (reqHeaders->count("Cookie") != 0) {
     string cookies = (*reqHeaders)["Cookie"];
     string sessionIdString = cookies.substr(cookies.find("=") + 1);
-    cout << "cookie is " << cookies << endl;
-    cout << "sessIDString is " << sessionIdString << endl;
     sessionId = stoll(sessionIdString, nullptr);
     uid = sessionMap[sessionId];
   }
@@ -233,7 +222,6 @@ string handleGet(map<string, string>* reqHeaders) {
     cout << "login page" << endl;
     // login page
     body = getLogin();
-    //cout << "login is " << body << endl;
   } else if (uri.compare("/cal") == 0 && uid != -1) {
     cout << "cal page" << endl;
     // cal page
@@ -243,7 +231,7 @@ string handleGet(map<string, string>* reqHeaders) {
     body += getFooter();
 
   } else if (uri.compare("/getEvents") == 0 && uid != -1) {
-    cout << "getevents" << endl;
+    //cout << "getevents" << endl;
     // getEvents, has uid
     body = getEventsJson(uid);
     (*resHeaders)["Content-Type"] = "application/json; charset=UTF-8";
@@ -267,7 +255,6 @@ string handlePost(map<string, string>* reqHeaders) {
   if (reqHeaders->count("Cookie") != 0) {
     string cookies = (*reqHeaders)["Cookie"];
     string sessionIdString = cookies.substr(cookies.find("=") + 1);
-    cout << sessionIdString << endl;
     sessionId = stoll(sessionIdString, nullptr);
     uid = sessionMap[sessionId];
   }
@@ -275,13 +262,12 @@ string handlePost(map<string, string>* reqHeaders) {
   (*resHeaders)["Server"] = "CSE461";
   (*resHeaders)["Content-Type"] = "text/html; charset=UTF-8";
 
-  cout << "uri is " << uri << ", uid is " << uid << endl;
+  //cout << "uri is " << uri << ", uid is " << uid << endl;
 
   string body;
   if (uri.compare("/createUser") == 0 && uid == -1) {
     cout << "create user" << endl;
     string params = (*reqHeaders)["params"];
-    cout << "params is '" << params << "'" << endl;
     string username = params.substr(9, params.find("&") - 9);
     string password = params.substr(params.find("&") + 10);
 
@@ -300,7 +286,6 @@ string handlePost(map<string, string>* reqHeaders) {
   } else if (uri.compare("/login") == 0 && uid == -1) {
     cout << "login" << endl;
     string params = (*reqHeaders)["params"];
-    cout << "params is '" << params << "'" << endl;
     string username = params.substr(9, params.find("&") - 9);
     string password = params.substr(params.find("&") + 10);
 
@@ -310,10 +295,8 @@ string handlePost(map<string, string>* reqHeaders) {
 
     stringstream bodyStream;
     if (sess == -1) {
-      cout << "invalid login" << endl;
       bodyStream << getLogin();
     } else {
-      cout << "logging in" << endl;
       stringstream cookie;
       cookie << "sessionId=" << sess;
       (*resHeaders)["Set-Cookie"] = cookie.str();
@@ -328,8 +311,8 @@ string handlePost(map<string, string>* reqHeaders) {
     
 
   } else if (uri.compare("/createGroup") == 0 && uid != -1) {
+    cout << "createGroup" << endl;
     string params = (*reqHeaders)["params"];
-    cout << "params is '" << params << "'" << endl;
     string groupName = params.substr(11);
 
     stringstream bodyStream;
@@ -345,9 +328,8 @@ string handlePost(map<string, string>* reqHeaders) {
     body = bodyStream.str();
     
   } else if (uri.compare("/addToGroup") == 0 && uid != -1) {
- 
+    cout << "addToGroup" << endl;
     string params = (*reqHeaders)["params"];
-    cout << "params is '" << params << "'" << endl;
     string groupName = params.substr(11, params.find("&") - 11);
     params = params.substr(params.find("&") + 1);
     string addedName = params.substr(11, params.find("&") - 11);
@@ -356,9 +338,6 @@ string handlePost(map<string, string>* reqHeaders) {
     long groupId = groupIdByName(groupName);
     long addedId = userIdByName(addedName);
 
-    cout << "gName is " << groupName << ", aName is " << addedName << ", admin is " << admin << endl;
-    cout << "gID is " << groupId << ", aID is " << addedId << endl;
-
     stringstream bodyStream;
     bool added = addToGroup(uid, addedId, groupId, admin);
 
@@ -366,15 +345,15 @@ string handlePost(map<string, string>* reqHeaders) {
       cout << "added to group!" << endl;
       bodyStream << "Successfully added '" << addedName << "' to '" << groupName << "'";
     } else {
-      cout << "did not add to group." << endl;
+      cout << "Error: could not add '" << addedName << "' to '" << groupName << "'";
       bodyStream << "Error: could not add '" << addedName << "' to '" << groupName << "'";
     }
 
     body = bodyStream.str();
     
   } else if (uri.compare("/createEvent") == 0 && uid != -1) {
+    cout << "createEvent" << endl;
     string params = (*reqHeaders)["params"];
-    cout << "params is '" << params.c_str() << "'" << endl;
     string eventName = params.substr(5, params.find("&") - 5);
     params = params.substr(params.find("&") + 1);
     string timeString = params.substr(9, params.find("&") - 9);
@@ -387,7 +366,6 @@ string handlePost(map<string, string>* reqHeaders) {
     time_t eventTime;
     timeStream << timeString;
     timeStream >> eventTime;
-    cout << "time_t is " << eventTime << endl;
 
     long eventId;
     if (withGroup) {
@@ -412,8 +390,8 @@ string handlePost(map<string, string>* reqHeaders) {
     body = bodyStream.str();
     
   } else if (uri.compare("/editEvent") == 0 && uid != -1) {
+    cout << "editEvent" << endl;
     string params = (*reqHeaders)["params"];
-    cout << "params is '" << params << "'" << endl;
     long eventId = stol(params.substr(3, params.find("&") - 3), nullptr);
     params = params.substr(params.find("&") + 1);
     string eventName = params.substr(5, params.find("&") - 5);
@@ -426,7 +404,6 @@ string handlePost(map<string, string>* reqHeaders) {
     time_t eventTime;
     timeStream << timeString;
     timeStream >> eventTime;
-    cout << "time_t is " << eventTime << endl;
 
     renameEvent(uid, eventId, eventName);
     rescheduleEvent(uid, eventId, eventTime);

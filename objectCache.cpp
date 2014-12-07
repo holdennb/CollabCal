@@ -116,7 +116,6 @@ lockptr<Group> acquireGroup(const long groupID){
   newEntry->ttl = GROUP_CACHESIZE;
   groupCache[groupID] = newEntry;
   groupCacheManager.unlock();
-  cout << "lG is " << loadedGroup->getName() << endl;
   return lockptr<Group>(loadedGroup, &(newEntry->m));
 }
 
@@ -191,9 +190,7 @@ long userIdByName(const string &username){
 
 long groupIdByName(const string &name){
   for(auto it = groupFileMap.begin(); it != groupFileMap.end(); ++it){
-    cout << "group ID is " << it->first << endl;
     auto checkingGroup = acquireGroup(it->first);
-    cout << "checking " << checkingGroup->getName() << endl;
     if (checkingGroup->getName() == name)
       return checkingGroup->getID();
   }

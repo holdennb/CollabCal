@@ -15,7 +15,6 @@ using namespace std;
 /* Construct JSON string of a user's events */
 const string getEventsJson(const long userID) {
   list<long>* events = getEvents(userID);
-  cout << "events.size() = " << events->size() << endl;
   stringstream json;
   json << "[";
   for (long eventID: *events) {
@@ -24,7 +23,6 @@ const string getEventsJson(const long userID) {
     json << "\"id\": \"" << event->getID() << "\",";
     json << "\"name\": \"" << event->getName() << "\",";
     time_t time = event->getTime();
-    cout << "event time is " << time << endl;
     struct tm * timeinfo = localtime(&time);
     json << "\"year\": \"" << (timeinfo->tm_year + 1900) << "\",";
     json << "\"month\": \"" << (timeinfo->tm_mon + 1) << "\",";
@@ -201,8 +199,8 @@ const string getLogin() {
   login << "<p class='register-link'><span>Or Create a New Account</span></p>";
   login << "<div id='register-div'>";
   login << "<form action='" << newUser << "' method='POST'>";
-  login << "<span>(Alphanumeric characters only)</span>\n";
   login << "<label>Username</label><br />";
+  login << "<span>(Alphanumeric characters only)</span><br />\n";
   login << "<input type='text' name='username' class='username' /><br />";
   login << "<label>Password</label><br />";
   login << "<input type='password' name='password' class='password' /><br />";
@@ -274,7 +272,7 @@ const string getExtras() {
         "}\n"
     "});\n"
     "e.preventDefault();\n"
-    "e.unbind();});\n"
+    "});\n"
 "$('#login-div form').submit(function(e) {\n"
 "var postData = $(this).serializeArray();\n"
     "var formURL = $(this).attr('action');\n"
@@ -287,7 +285,7 @@ const string getExtras() {
         "}\n"
     "});\n"
     "e.preventDefault();\n"
-    "e.unbind();});\n"
+    "});\n"
 "$('#edit-event form').submit(function(e) {\n"
 "var datetime = $(this).children('input.event-datetime').val();\n"
     "var dateAndTime = datetime.split(' ');\n"
@@ -313,7 +311,7 @@ const string getExtras() {
         "}\n"
     "});\n"
     "e.preventDefault();\n"
-    "e.unbind();});\n"
+    "});\n"
 "$('#create-event form').submit(function(e) {\n"
 	"var datetime = $(this).children('input.event-datetime').val();\n"
     "var dateAndTime = datetime.split(' ');\n"
@@ -338,15 +336,15 @@ const string getExtras() {
         "}\n"
     "});\n"
     "e.preventDefault();\n"
-    "e.unbind();\n"
 "});\n"
 "$('#groups .make-group form').submit(function(e) {\n"
-"var postData = $(this).serializeArray();\n"
+"var postData = $(this).serialize();\n"
     "var formURL = $(this).attr('action');\n"
     "$.ajax({\n"
         "url : formURL,\n"
         "type: 'POST',\n"
         "data : postData,\n"
+        "processData: false,\n"
         "contentType: 'text/plain',\n"
         "success: function(data, textStatus, jqXHR) {\n"
             "$('#groups .make-group form').find('.message').text(data);\n"
@@ -356,7 +354,7 @@ const string getExtras() {
         "}\n"
     "});\n"
     "e.preventDefault();\n"
-    "e.unbind();});\n"
+    "});\n"
 "$('#groups .add-to-group form').submit(function(e) {\n"
 "var postData = $(this).serializeArray();\n"
     "var formURL = $(this).attr('action');\n"
@@ -373,10 +371,9 @@ const string getExtras() {
         "}\n"
     "});\n"
     "e.preventDefault();\n"
-    "e.unbind();\n"
 "});\n"
 "if ($('table').length) {\n"
-    "poll();\n"
+    "//poll();\n"
 "}\n"
 "});\n"
 "function poll(){\n"
