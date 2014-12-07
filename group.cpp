@@ -21,8 +21,9 @@ string Group::getName() const { return name;}
 
 list<long>* Group::getUserIDs() const {
   auto result = new list<long>();
-  transform(userInfos.begin(), userInfos.end(), result->begin(),
-	    [](pair<long,bool> userInfo){ return userInfo.first; });
+  for (auto userInfo: userInfos) {
+    result->push_back(userInfo.first);
+  }
   return result;
 }
 

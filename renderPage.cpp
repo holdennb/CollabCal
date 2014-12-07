@@ -373,7 +373,7 @@ const string getExtras() {
     "e.preventDefault();\n"
 "});\n"
 "if ($('table').length) {\n"
-    "//poll();\n"
+    "poll();\n"
 "}\n"
 "});\n"
 "function poll(){\n"

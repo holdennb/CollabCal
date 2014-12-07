@@ -178,10 +178,12 @@ long makeEvent(const long userID, const string &eventName, const time_t eventTim
   auto userIDs = group->getUserIDs();
   cout << "Creating group event for " << group->getName() << ", group has " << userIDs->size() << " users" << endl;
   for_each(userIDs->begin(), userIDs->end(),
-	   [eventName, eventID, groupWritable](long userID){
-	     cout << "Inviting group member " << userID << " to event " << eventName << endl;
-	     auto user = acquireUser(userID);
-	     user->addEvent(eventID,groupWritable);
+	   [userID, eventName, eventID, groupWritable](long userIdInGroup){
+	     if (userID != userIdInGroup) {
+	       cout << "Inviting group member " << userIdInGroup << " to event " << eventName << endl;
+	       auto user = acquireUser(userIdInGroup);
+	       user->addEvent(eventID,groupWritable);
+	     }
 	   });
   delete userIDs;
   return eventID;
