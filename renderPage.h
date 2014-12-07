@@ -17,5 +17,7 @@ const std::string getHeader(const std::string &username);
 /* Returns HTML for the login page */
 const std::string getLogin();
 
-const std::string getResponseHeader(const std::string &firstline, const std::map<std::string, std::string>* reqHeaders,
+const std::string getResponseHeader(const std::string &firstline, const std::map<std::string, std::string>* resHeaders,
    const int contentLength);
+
+const std::string getExtras();
