@@ -18,12 +18,14 @@ class Group{
   std::list<long> events;
   /* Recreate an existing group with a specific ID. */
   Group(const long id,
+	const std::string &name,
 	const std::list<std::pair<long,bool> > &initialUsers = std::list<std::pair<long,bool> >());
  public:
   /* The next group ID to use. */
   static long ID_COUNTER;
   /* Create a group with some initial users in it. */
-  Group(const std::list<std::pair<long,bool> > &initialUsers = std::list<std::pair<long,bool> >());
+  Group(const std::string &name,
+	const std::list<std::pair<long,bool> > &initialUsers = std::list<std::pair<long,bool> >());
 
   /* Get the unique identifier of this group. */
   long getID() const;

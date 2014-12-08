@@ -7,12 +7,13 @@ using namespace std;
 
 long Group::ID_COUNTER = 0;
 
-Group::Group(const std::list<pair<long,bool>> &initialUsers) :
-  id(ID_COUNTER++), userInfos(initialUsers){}
+Group::Group(const string &name, const std::list<pair<long,bool>> &initialUsers) :
+  id(ID_COUNTER++), name(name), userInfos(initialUsers){}
 
 Group::Group(const long id,
+	     const string &name,
 	     const std::list<pair<long,bool>> &initialUsers) :
-  id(id), userInfos(initialUsers){}
+  id(id), name(name), userInfos(initialUsers){}
 
 long Group::getID() const { return id; }
 
@@ -87,6 +88,7 @@ Group* Group::readFromFile(const string &filename){
 
   string groupIdLine;
   string userInfoLine;
+  string name;
 
   long id;
   list<pair<long,bool>> userInfos;
@@ -135,5 +137,5 @@ Group* Group::readFromFile(const string &filename){
     userInfos.push_front(pair<long,bool>(userID, canWrite));
   }
   file.close();
-  return new Group(id, userInfos);
+  return new Group(id, name, userInfos);
 }

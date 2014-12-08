@@ -76,7 +76,7 @@ bool deleteUser(const long userID){
 }
 
 long makeGroup(const long userID, const string &groupName){
-  Group newGroup(list<pair<long,bool> >(1,pair<long,bool>(userID, true)));
+  Group newGroup(groupName, list<pair<long,bool> >(1,pair<long,bool>(userID, true)));
   long groupID = newGroup.getID();
   string groupFilename = groupDir + groupName;
   if(!newGroup.writeToFile(groupFilename)){
