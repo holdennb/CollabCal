@@ -112,6 +112,7 @@ bool addToGroup(const long adderID, const long addedID, const long groupID, cons
 	     added->addEvent(eventID, false);
 	   });
   delete groupEvents;
+  cout << "Successfully added user " << addedID << " to group." << endl;
   return true;
 }
 
@@ -175,8 +176,10 @@ long makeEvent(const long userID, const string &eventName, const time_t eventTim
   long eventID = makeEvent(userID, eventName, eventTime);
   group->addEvent(eventID);
   auto userIDs = group->getUserIDs();
+  cout << "Creating group event for " << group->getName() << "..." << endl;
   for_each(userIDs->begin(), userIDs->end(),
-	   [eventID, groupWritable](long userID){
+	   [eventName, eventID, groupWritable](long userID){
+	     cout << "Inviting group member " << userID << " to event " << eventName << endl;
 	     auto user = acquireUser(userID);
 	     user->addEvent(eventID,groupWritable);
 	   });
