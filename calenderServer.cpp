@@ -342,6 +342,7 @@ string handlePost(map<string, string>* reqHeaders) {
     cout << "createGroup" << endl;
     string params = (*reqHeaders)["params"];
     string groupName = params.substr(11);
+    replace(groupName.begin(), groupName.end(), '+', ' ');
 
     stringstream bodyStream;
     long groupId = makeGroup(uid, groupName);
@@ -383,6 +384,7 @@ string handlePost(map<string, string>* reqHeaders) {
     cout << "createEvent" << endl;
     string params = (*reqHeaders)["params"];
     string eventName = params.substr(5, params.find("&") - 5);
+    replace(eventName.begin(), eventName.end(), '+', ' ');
     params = params.substr(params.find("&") + 1);
     string timeString = params.substr(9, params.find("&") - 9);
     params = params.substr(params.find("&") + 1);
