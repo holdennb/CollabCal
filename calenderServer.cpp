@@ -183,13 +183,20 @@ void handleClient(int clientSocket){
 string handleRequest(const string& request){
   map<string, string>* reqHeaders = parseRequest(request);
   if ((*reqHeaders)["method"].compare("GET") == 0) {
-    return handleGet(reqHeaders);
+    string response = handleGet(reqHeaders);
+    delete reqHeaders;
+    return result;
   } else if ((*reqHeaders)["method"].compare("POST") == 0) {
-    return handlePost(reqHeaders);
+    string response = handlePost(reqHeaders);
+    delete reqHeaders;
+    return result;
   } else {
     // should make 404
+    string message = "404 Page Not Found";
     cout << "returning error, method is '" << (*reqHeaders)["method"] << "'" << endl;
-    return "ERROR";
+    string result = getResponseHeader("HTTP/1.1 404 Not Found", reqHeaders, body.size()) + "\r\n 404 Page Not Found";
+    delete reqHeaders;
+    return result;
   }
 }
 
@@ -240,7 +247,7 @@ string handleGet(map<string, string>* reqHeaders) {
     } else
       uid = sessionMap[sessionId];
   }
-  map<string, string> resHeaders = map<string, string>();
+  map<string, string> resHeaders();
   resHeaders["Server"] = "CSE461";
   resHeaders["Content-Type"] = "text/html; charset=UTF-8";
 
