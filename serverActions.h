@@ -24,6 +24,9 @@ long makeUser(const std::string &username, const std::string &password);
    returns -1 if there is not a user with that username and password. */
 long long login(const std::string &username, const std::string &password);
 
+/* Remove a session ID from the mapping. */
+void logout(long long sessionID);
+
 /*=======================================
   User Actions.
   Only currently existing users can do these things.
