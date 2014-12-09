@@ -8,6 +8,7 @@
 #include <map>
 
 extern std::map<long long, long> sessionMap;
+extern std::map<long long, int> sessionTTLs;
 
 /*==================================
   Visitor Actions.

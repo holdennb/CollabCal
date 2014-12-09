@@ -11,12 +11,22 @@
 #include <sstream>
 #include <algorithm>
 #include <signal.h>
+#include <unistd.h>
 
 using namespace std;
+
+list<int> openSockets;
 
 void shutdown(){
   dumpCache();
   saveFileIndices();
+  closeSockets();
+}
+
+void closeSockets(){
+  for(int openSocket : openSockets){
+    close(openSocket);
+  }
 }
 
 void saveFileIndices(){

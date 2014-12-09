@@ -1,8 +1,11 @@
+#include <list>
 
 /* Load the persistent state. */
 void init();
 /* Save the persistent state. */
 void shutdown();
+/* Close open sockets. */
+void closeSockets();
 
 /* Dump the object cache to files. */
 void dumpCache();
@@ -15,3 +18,5 @@ void saveFileIndices();
 void parseUserFile();
 void parseGroupFile();
 void parseEventFile();
+
+extern std::list<int> openSockets;

@@ -81,6 +81,7 @@ void serverListen(int portNum){
     cerr << "Couldn't get a system socket!" << endl;
     exit(1);
   }
+  openSockets.push_front(listenSocket);
 
   if(bind(listenSocket, serverInfo->ai_addr, serverInfo->ai_addrlen) == -1){
     cerr << "Couldn't bind the socket!" << endl;
@@ -110,9 +111,22 @@ void listenLoop(int listenSocket){
       cerr << "Failed to accept client." << endl;
       continue;
     }
+    openSockets.push_front(clientSocket);
     clientThreads.push_front(thread(handleClient, clientSocket));
   }
 }
+void expireSessionIDs(){
+  while(true){
+    for(auto sessionTTLMapping : sessionTTLs){
+      if(sessionTTLMapping.second-- <= 0){
+	sessionMap.erase(sessionTTLMapping.first);
+	sessionTTLs.erase(sessionTTLMapping.first);
+      }
+    }
+    sleep(1);
+  }
+}
+
 const int BUFFERSIZE = 513;
 void handleClient(int clientSocket){
   // Buffer to hold part of the request.
