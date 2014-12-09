@@ -33,8 +33,10 @@ long makeUser(const string &username, const string &password){
 
 long long login(const string &username, const string &password){
   long userID = userIdByName(username);
-  if(userID == -1)
+  if(userID == -1){
+    cout << "login failed." << endl;
     return -1;
+  }
   auto user = acquireUser(userID);
   if (user.isNull()){
     cerr << "was given a bad userID by function userIdByName!" << endl;

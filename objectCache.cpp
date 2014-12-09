@@ -195,6 +195,7 @@ long userIdByName(const string &username){
     if (it->second.substr(userDir.length()) == username)
       return it->first;
   }
+  cout << "Didn't find a user with name " << username << endl;
   return -1;
 }
 
