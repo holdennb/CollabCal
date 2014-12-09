@@ -245,7 +245,7 @@ string handleGet(map<string, string>* reqHeaders) {
       cout << "Bad session ID, redirecting to login." << endl;
       body = getLogin();
     } else
-      uid = sessionMap[sessionId];
+      uid = usersessionIt->second;
   }
   map<string, string> resHeaders;
   resHeaders["Server"] = "CSE461";
@@ -289,7 +289,9 @@ string handlePost(map<string, string>* reqHeaders) {
     string cookies = (*reqHeaders)["Cookie"];
     string sessionIdString = cookies.substr(cookies.find("=") + 1);
     sessionId = stoll(sessionIdString, nullptr);
-    uid = sessionMap[sessionId];
+    auto sessionIt = sessionMap.find(sessionId);
+    if(sessionIt != sessionMap.end())
+      uid = sessionIt->second;
   }
   map<string, string> resHeaders;
   resHeaders["Server"] = "CSE461";
