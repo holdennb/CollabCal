@@ -93,6 +93,7 @@ void init(){
   sigemptyset(&sigIntHandler.sa_mask);
   sigIntHandler.sa_flags = 0;
   sigaction(SIGINT, &sigIntHandler, NULL);
+  sigaction(SIGSEGV, &sigIntHandler, NULL);
 
   parseUserFile();
   parseEventFile();
