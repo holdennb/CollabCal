@@ -289,7 +289,7 @@ string handlePost(map<string, string>* reqHeaders) {
   //cout << "uri is " << uri << ", uid is " << uid << endl;
 
   string body;
-  if (uri.compare("/createUser") == 0 && uid == -1) {
+  if (uri.compare("/createUser") == 0) {
     cout << "create user" << endl;
     string params = (*reqHeaders)["params"];
     string username = params.substr(9, params.find("&") - 9);
