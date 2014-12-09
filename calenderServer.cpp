@@ -82,6 +82,8 @@ void serverListen(int portNum){
     exit(1);
   }
   openSockets.push_front(listenSocket);
+  int yes = 1;
+  setsockopt(listenSocket, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
 
   if(bind(listenSocket, serverInfo->ai_addr, serverInfo->ai_addrlen) == -1){
     cerr << "Couldn't bind the socket!" << endl;
