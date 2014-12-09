@@ -47,6 +47,7 @@ const string getEventsJson(const long userID) {
   if (events->size() > 0) {
     jsonString = jsonString.substr(0, jsonString.size()-1);
   }
+  delete events;
   return jsonString + "]";
 }
 
