@@ -232,6 +232,14 @@ bool deleteEvent(const long userID, const long eventID){
   auto user = acquireUser(userID);
   if (user.isNull() || !user->canWrite(eventID))
     return false;
+  for(auto userEntry : userFileMap){
+    if (userEntry.first == userID)
+      user->removeEvent(eventID);
+    else{
+      auto otherUser = acquireUser(userEntry.first);
+      otherUser->removeEvent(eventID);
+    }
+  }
   auto it = eventFileMap.find(eventID);
   if(it == eventFileMap.end())
     return false;
