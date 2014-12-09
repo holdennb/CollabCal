@@ -60,6 +60,10 @@ long long login(const string &username, const string &password){
   return sessionID;
 }
 
+void logout(long long sessionID){
+  sessionMap.erase(sessionID);
+  sessionTTLs.erase(sessionID);
+}
 bool userChangePassword(const long userID, const string &oldPassword, const string &newPassword){
   auto user = acquireUser(userID);
   if (user.isNull())
