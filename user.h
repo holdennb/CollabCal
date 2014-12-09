@@ -28,6 +28,8 @@ class User{
      using the existing given id.
   */
   User(const std::string &password, const long id);
+  // Privatize default constructor
+  User() = delete;
 
  public:
   /* The next user ID to use. */
