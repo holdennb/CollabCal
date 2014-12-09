@@ -87,6 +87,7 @@ long makeGroup(const long userID, const string &groupName){
   Group newGroup(groupName, list<pair<long,bool> >(1,pair<long,bool>(userID, true)));
   long groupID = newGroup.getID();
   string groupFilename = groupDir + groupName;
+  replace(groupFilename.begin(), groupFilename.end(), ' ', '_');
   if(!newGroup.writeToFile(groupFilename)){
     cerr << "could not create group " << groupName << ": problem writing group file!" << endl;
     return -1;
@@ -148,6 +149,8 @@ long makeEvent(const long userID, const string &eventName, const time_t eventTim
   Event newEvent(eventName, eventTime);
   long eventID = newEvent.getID();
   string eventFilename = eventDir + eventName;
+
+  replace(eventFilename.begin(), eventFilename.end(), ' ', '_');
   
   auto user = acquireUser(userID);
   if (user.isNull()) return -1;
@@ -186,11 +189,17 @@ long makeEvent(const long userID, const string &eventName, const time_t eventTim
   auto userIDs = group->getUserIDs();
   cout << "Creating group event for " << group->getName() << ", group has " << userIDs->size() << " users" << endl;
   for_each(userIDs->begin(), userIDs->end(),
-	   [userID, eventName, eventID, groupWritable](long userIdInGroup){
+	   [userID, eventName, eventID, groupWritable, &group]
+	   (long userIdInGroup){
 	     if (userID != userIdInGroup) {
 	       cout << "Inviting group member " << userIdInGroup << " to event " << eventName << endl;
 	       auto user = acquireUser(userIdInGroup);
-	       user->addEvent(eventID,groupWritable);
+	       if (user.isNull()){
+		 cerr << "Invalid user " << userIdInGroup << " in group. Removing." << endl;
+		 group->removeUser(userIdInGroup);
+	       }
+	       else
+		 user->addEvent(eventID,groupWritable);
 	     }
 	   });
   delete userIDs;
@@ -250,5 +259,9 @@ bool deleteEvent(const long userID, const long eventID){
 
 list<long>* getEvents(const long userID){
   auto user = acquireUser(userID);
+  if (user.isNull()){
+    cerr << "Could not acquire user " << userID << endl;
+    return nullptr;
+  }
   return user->getEventIDs();
 }

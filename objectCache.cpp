@@ -147,6 +147,10 @@ lockptr<Event> acquireEvent(const long eventID){
     return lockptr<Event>(nullptr, nullptr);
   }
   Event* loadedEvent = Event::readFromFile(mapIt->second);
+  if (loadedEvent == nullptr){
+    cerr << "Could not load event " << mapIt->second << endl;
+    return lockptr<Event>(nullptr, nullptr);
+  }
   cacheRecord<Event>* newEntry = new cacheRecord<Event>();
   newEntry->item = loadedEvent;
   newEntry->ttl = EVENT_CACHESIZE;
