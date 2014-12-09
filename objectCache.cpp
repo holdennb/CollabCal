@@ -159,14 +159,20 @@ void dumpCache(){
   for_each(userCache.begin(), userCache.end(),
 	   [](pair<long, cacheRecord<User>* > entry){
 	     entry.second->item->writeToFile(userFileMap[entry.first]);
+	     delete entry.second->item;
+	     delete entry.second;
 	   });
   for_each(groupCache.begin(), groupCache.end(),
 	   [](pair<long, cacheRecord<Group>* > entry){
 	     entry.second->item->writeToFile(groupFileMap[entry.first]);
+	     delete entry.second->item;
+	     delete entry.second;
 	   });
   for_each(eventCache.begin(), eventCache.end(),
 	   [](pair<long, cacheRecord<Event>* > entry){
 	     entry.second->item->writeToFile(eventFileMap[entry.first]);
+	     delete entry.second->item;
+	     delete entry.second;
 	   });
 }
 
