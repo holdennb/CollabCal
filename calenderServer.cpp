@@ -175,6 +175,7 @@ void handleClient(int clientSocket){
     // again. Otherwise, we'll just try to receive andf then break.
     //}
   close(clientSocket);
+  openSockets.remove(clientSocket);
 }
 
 string handleRequest(const string& request){
