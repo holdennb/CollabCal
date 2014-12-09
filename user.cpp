@@ -45,7 +45,7 @@ void User::addEvent(const long eventID, const bool canWrite){
 }
 
 void User::removeEvent(const long eventID){
-  eventsInfo.remove_if([eventID](pair<long,bool> eventInfo){ return eventInfo.second == eventID; });
+  eventsInfo.remove_if([eventID](pair<long,bool> eventInfo){ return eventInfo.first == eventID; });
 }
 
 void User::setCanWrite(const long eventID, const bool canWrite){

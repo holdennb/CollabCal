@@ -19,6 +19,12 @@ const string getEventsJson(const long userID) {
   json << "[";
   for (long eventID: *events) {
     auto event = acquireEvent(eventID);
+    if (event.isNull()){
+      cerr << "Couldn't find event " << eventID << "!" << endl;
+      auto user = acquireUser(userID);
+      user->removeEvent(eventID);
+      continue;
+    }
     json << "{";
     json << "\"id\": \"" << event->getID() << "\",";
     json << "\"name\": \"" << event->getName() << "\",";

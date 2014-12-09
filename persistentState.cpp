@@ -103,6 +103,9 @@ void init(){
 void parseUserFile(){
   struct stat buffer;
   string userIndexFile = userDir + userIndex;
+  if(stat(userDir.c_str(), &buffer) != 0)
+    if (mkdir(userDir.c_str(), 0777) != 0)
+      cerr << "Could not create directory " << userDir << endl;
   if (stat(userIndexFile.c_str(), &buffer) == 0){
     ifstream usersFile;
     string nextIdLine;
@@ -144,6 +147,10 @@ void parseUserFile(){
 void parseGroupFile(){
   struct stat buffer;
   string groupIndexFile = groupDir + groupIndex;
+  if(stat(groupDir.c_str(), &buffer) != 0)
+    if (mkdir(groupDir.c_str(), 0777) != 0)
+      cerr << "Could not create directory " << groupDir << endl;
+
   if (stat(groupIndexFile.c_str(), &buffer) == 0){
     ifstream groupFile;
     string nextIdLine;
@@ -185,6 +192,10 @@ void parseGroupFile(){
 void parseEventFile(){
   struct stat buffer;
   string eventIndexFile = eventDir + eventIndex;
+  if(stat(eventDir.c_str(), &buffer) != 0)
+    if(mkdir(eventDir.c_str(), 0777) != 0)
+      cerr << "Could not create directory " << eventDir << endl;
+
   if (stat(eventIndexFile.c_str(), &buffer) == 0){
     ifstream eventsFile;
     string nextIdLine;
