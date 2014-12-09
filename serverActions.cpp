@@ -15,6 +15,9 @@
 using namespace std;
 
 map<long long, long> sessionMap;
+map<long long, int> sessionTTLs;
+
+const int SESSION_TIMEOUT = 20*60;
 
 long makeUser(const string &username, const string &password){
   User newUser(password);
@@ -53,6 +56,7 @@ long long login(const string &username, const string &password){
   }
 
   sessionMap[sessionID] = userID;
+  sessionTTLs[sessionID] = SESSION_TIMEOUT;
   return sessionID;
 }
 

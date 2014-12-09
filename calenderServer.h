@@ -2,11 +2,16 @@
 #include <list>
 #include <map>
 
-/* The main point of entry, which spins up a server, and responds to user requests. */
+/* The main point of entry, which spins up a server, and responds to
+   user requests. */
 int main(int argc, char** argv);
 void printUsageAndExit();
 
 void serverListen(int portNum);
+
+/* Keeps track of how long sessions have been alive, and kills them
+   after the proper timeout. */
+void expireSessionIDs();
 
 void listenLoop(int listenSocket);
 

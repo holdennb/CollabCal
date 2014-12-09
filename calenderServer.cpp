@@ -102,6 +102,7 @@ void listenLoop(int listenSocket){
   struct sockaddr_storage clientAddr;
   socklen_t cAddrSize = sizeof(clientAddr);
   list<thread> clientThreads;
+  thread ttlThread(expireSessionIDs);
   int clientSocket;
 
   while(true){
