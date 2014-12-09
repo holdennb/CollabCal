@@ -307,7 +307,9 @@ string handlePost(map<string, string>* reqHeaders) {
     }
 
     body = bodyStream.str();
-  } else if (uri.compare("/login") == 0 && uid == -1) {
+  } else if (uri.compare("/login") == 0) {
+    if (uid != -1)
+      logout(uid);
     cout << "login" << endl;
     string params = (*reqHeaders)["params"];
     string username = params.substr(9, params.find("&") - 9);
