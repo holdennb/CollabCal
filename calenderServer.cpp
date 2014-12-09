@@ -138,15 +138,20 @@ void handleClient(int clientSocket){
     }
     if (bytesReceived == 0) return;
     // Get the response.
-    response = handleRequest(request);
+    try{
+      response = handleRequest(request);
+    } catch (exception e){
+      cerr << "got an exception, killing client thread..." << endl;
+      return;
+    }
 
     // Reply
     bytesSent = 0;
     while(bytesSent < response.length()){
       sending = send(clientSocket, response.c_str(), response.length(), 0);
       if (sending == -1){
-  cerr << "Failed to respond to client. " << endl;
-  break;
+	cerr << "Failed to respond to client. " << endl;
+	break;
       }
       bytesSent += sending;
     }
@@ -205,17 +210,22 @@ string handleGet(map<string, string>* reqHeaders) {
   long long sessionId = -1;
   long uid = -1;
   string uri = (*reqHeaders)["uri"];
+  string body;
   if (reqHeaders->count("Cookie") != 0) {
     string cookies = (*reqHeaders)["Cookie"];
     string sessionIdString = cookies.substr(cookies.find("=") + 1);
     sessionId = stoll(sessionIdString, nullptr);
-    uid = sessionMap[sessionId];
+    auto usersessionIt = sessionMap.find(sessionId);
+    if (usersessionIt == sessionMap.end()){
+      cout << "Bad session ID, redirecting to login." << endl;
+      body = getLogin();
+    } else
+      uid = sessionMap[sessionId];
   }
   map<string, string>* resHeaders = new map<string, string>();
   (*resHeaders)["Server"] = "CSE461";
   (*resHeaders)["Content-Type"] = "text/html; charset=UTF-8";
 
-  string body;
   if (uri.compare("/cal") == 0 && uid == -1) {
     cout << "login page" << endl;
     // login page
