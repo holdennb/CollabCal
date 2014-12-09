@@ -240,9 +240,9 @@ string handleGet(map<string, string>* reqHeaders) {
     } else
       uid = sessionMap[sessionId];
   }
-  map<string, string>* resHeaders = new map<string, string>();
-  (*resHeaders)["Server"] = "CSE461";
-  (*resHeaders)["Content-Type"] = "text/html; charset=UTF-8";
+  map<string, string> resHeaders = map<string, string>();
+  resHeaders["Server"] = "CSE461";
+  resHeaders["Content-Type"] = "text/html; charset=UTF-8";
 
   if (uri.compare("/cal") == 0 && uid == -1) {
     cout << "login page" << endl;
@@ -260,17 +260,17 @@ string handleGet(map<string, string>* reqHeaders) {
     //cout << "getevents" << endl;
     // getEvents, has uid
     body = getEventsJson(uid);
-    (*resHeaders)["Content-Type"] = "application/json; charset=UTF-8";
+    resHeaders["Content-Type"] = "application/json; charset=UTF-8";
   } else {
     // 404
     cout << "error page" << endl;
 
     string message = "404 Page Not Found";
-    return getResponseHeader("HTTP/1.1 404 Not Found", resHeaders, body.size())
+    return getResponseHeader("HTTP/1.1 404 Not Found", &resHeaders, body.size())
       + "\r\n" + message;
   }
   
-  return getResponseHeader("HTTP/1.1 200 OK", resHeaders, body.size()) + "\r\n" + body;
+  return getResponseHeader("HTTP/1.1 200 OK", &resHeaders, body.size()) + "\r\n" + body;
 }
 
 string handlePost(map<string, string>* reqHeaders) {
