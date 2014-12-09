@@ -291,9 +291,9 @@ string handlePost(map<string, string>* reqHeaders) {
     sessionId = stoll(sessionIdString, nullptr);
     uid = sessionMap[sessionId];
   }
-  map<string, string>* resHeaders = new map<string, string>();
-  (*resHeaders)["Server"] = "CSE461";
-  (*resHeaders)["Content-Type"] = "text/html; charset=UTF-8";
+  map<string, string> resHeaders;
+  resHeaders["Server"] = "CSE461";
+  resHeaders["Content-Type"] = "text/html; charset=UTF-8";
 
   //cout << "uri is " << uri << ", uid is " << uid << endl;
 
@@ -334,7 +334,7 @@ string handlePost(map<string, string>* reqHeaders) {
     } else {
       stringstream cookie;
       cookie << "sessionId=" << sess;
-      (*resHeaders)["Set-Cookie"] = cookie.str();
+      resHeaders["Set-Cookie"] = cookie.str();
 
       bodyStream << getHeader(username);
       bodyStream << getEmptyCalendar();
@@ -455,11 +455,11 @@ string handlePost(map<string, string>* reqHeaders) {
     cout << "error page" << endl;
 
     string message = "404 Page Not Found";
-    return getResponseHeader("HTTP/1.1 404 Not Found", resHeaders, body.size())
+    return getResponseHeader("HTTP/1.1 404 Not Found", &resHeaders, body.size())
       + "\r\n" + message;
   }
   
-  return getResponseHeader("HTTP/1.1 200 OK", resHeaders, body.size()) + "\r\n" + body;
+  return getResponseHeader("HTTP/1.1 200 OK", &resHeaders, body.size()) + "\r\n" + body;
 }
 
 
