@@ -62,7 +62,9 @@ void saveFileIndices(){
   groupFile << Group::ID_COUNTER << endl;
   for_each(groupFileMap.begin(), groupFileMap.end(),
 	   [&groupFile](pair<long, string> filemap){
-	     groupFile << filemap.first << " " << filemap.second << endl;
+	     if (filemap.second.compare("") != 0) {
+	       groupFile << filemap.first << " " << filemap.second << endl;
+	     }
 	   });
   groupFile.close();
 

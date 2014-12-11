@@ -58,8 +58,8 @@ const string getEmptyCalendar() {
   struct tm* timeInfo = localtime(&curTime);
   int year = timeInfo->tm_year + 1900;
   int monthNum = timeInfo->tm_mon;
-  int today = timeInfo->tm_mday + 1;
-  int dayOfWeek = timeInfo->tm_wday + 1;
+  int today = timeInfo->tm_mday;
+  int dayOfWeek = timeInfo->tm_wday;
   cout << "today is " << year << "-" << monthNum << "-" << today << ", hour " << timeInfo->tm_hour << endl;
 
   // Calculate the day of the week of the 1st
@@ -155,13 +155,14 @@ const string getHeader(const string &username) {
   header << "\n</head><body>";
 
   long userID = userIdByName(username);
-  string newGroup   = "/createGroup";
-  string addToGroup = "/addToGroup";
+  string newGroup    = "/createGroup";
+  string addToGroup  = "/addToGroup";
+  string deleteGroup = "/deleteGroup";
 
   header << "<p id='user'>Logged in as <span class='username'>" << username;
   header << "</span><span class='id'>" << userID << "</span> ";
   header << "<span class='groups'>(group actions)</span> <span class='logout'>(Logout)</span></p>";
-  header << "<div id='groups'><div class='make-group form-div'>";
+  header << "<div id='groups'><div class='form-div'><div class='make-group'>";
   header << "<h3>Create New Group</h3>";
   header << "<form action='" << newGroup << "' method='POST'>";
   header << "<label>Group Name</label><br />";
@@ -169,7 +170,7 @@ const string getHeader(const string &username) {
   header << "<input type='submit' value='Create' class='submit' /><br />";
   header << "<span class='message'></span>";
   header << "</form></div>";
-  header << "<div class='add-to-group form-div'>";
+  header << "<div class='add-to-group'>";
   header << "<h3>Add User to Group</h3>";
   header << "<form action='" << addToGroup << "' method='POST'>";
   header << "<label>Group Name</label><br />";
@@ -180,7 +181,14 @@ const string getHeader(const string &username) {
   header << "<input type='checkbox' name='make-admin' class='make-admin' /><br />";
   header << "<input type='submit' value='Add' class='submit' /><br />";
   header << "<span class='message'></span>";
-  header << "</form></div></div>";
+  header << "</form></div><div class='delete-group'>";
+  header << "<h3>Delete Group</h3>";
+  header << "<form action='" << deleteGroup << "' method='POST'>";
+  header << "<label>Group Name</label><br />";
+  header << "<input type='text' name='group-name' class='group-name' /><br />";
+  header << "<input type='submit' value='Delete' class='submit' /><br />";
+  header << "<span class='message'></span>";
+  header << "</form></div></div></div>";
 
   return header.str();
 }
@@ -370,6 +378,24 @@ const string getExtras() {
     "});\n"
     "e.preventDefault();\n"
     "});\n"
+"$('#groups .delete-group form').submit(function(e) {\n"
+"var postData = $(this).serialize();\n"
+    "var formURL = $(this).attr('action');\n"
+    "$.ajax({\n"
+        "url : formURL,\n"
+        "type: 'POST',\n"
+        "data : postData,\n"
+        "processData: false,\n"
+        "contentType: 'text/plain',\n"
+        "success: function(data, textStatus, jqXHR) {\n"
+            "$('#groups .delete-group form').find('.message').text(data);\n"
+        "},\n"
+        "error: function(jqXHR, textStatus, errorThrown) {\n"
+            "$('#groups .delete-group form').find('.message').text(textStatus);\n"
+        "}\n"
+    "});\n"
+    "e.preventDefault();\n"
+    "});\n"
 "$('#groups .add-to-group form').submit(function(e) {\n"
 "var postData = $(this).serializeArray();\n"
     "var formURL = $(this).attr('action');\n"
@@ -486,12 +512,18 @@ const string getExtras() {
 "}"
 "/* Form */"
 ".form-div {"
-	"width: 70%;"
+	"width: 85%;"
 	"text-align: center;"
 	"margin: 30px auto;"
 	"border: 1px solid #333;"
 	"padding: 20px;"
 	"clear: both;"
+        "overflow: hidden;"
+"}"
+".form-div > div {"
+        "display: inline-block;"
+        "vertical-align: middle;"
+        "margin: 0px 30px;"
 "}"
 "#edit-event {"
 	"display: none;"

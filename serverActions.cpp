@@ -140,8 +140,9 @@ bool deleteGroup(const long userID, const long groupID){
   if (group.isNull()) return false;
   if (!group->userCanWrite(userID))
     return false;
-  auto it = groupFileMap.find(userID);
+  auto it = groupFileMap.find(groupID);
   if (it == groupFileMap.end()) return false;
+  
   remove(it->second.c_str());
   groupFileMap.erase(it);
   return true;

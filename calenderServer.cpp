@@ -191,7 +191,7 @@ string handleRequest(const string& request){
     delete reqHeaders;
     return response;
   } else {
-    // should make 404
+    // error
     string message = "404 Page Not Found";
     cout << "returning error, method is '" << (*reqHeaders)["method"] << "'" << endl;
     string result = getResponseHeader("HTTP/1.1 404 Not Found", reqHeaders, message.size()) + "\r\n" + message;
@@ -297,7 +297,6 @@ string handlePost(map<string, string>* reqHeaders) {
   resHeaders["Server"] = "CSE461";
   resHeaders["Content-Type"] = "text/html; charset=UTF-8";
 
-  //cout << "uri is " << uri << ", uid is " << uid << endl;
 
   string body;
   if (uri.compare("/createUser") == 0) {
@@ -305,8 +304,6 @@ string handlePost(map<string, string>* reqHeaders) {
     string params = (*reqHeaders)["params"];
     string username = params.substr(9, params.find("&") - 9);
     string password = params.substr(params.find("&") + 10);
-
-    cout << "username is " << username << " password is " << password << endl;
 
     long newId = makeUser(username, password);
     stringstream bodyStream;
@@ -365,8 +362,29 @@ string handlePost(map<string, string>* reqHeaders) {
 
     body = bodyStream.str();
     
+  } else if (uri.compare("/deleteGroup") == 0 && uid != -1) {
+    cout << "deleteGroup" << endl;
+    // group-name=___
+    string params = (*reqHeaders)["params"];
+    string groupName = params.substr(11);
+    replace(groupName.begin(), groupName.end(), '+', ' ');
+    long groupId = groupIdByName(groupName);
+
+    stringstream bodyStream;
+    bool deleted = deleteGroup(uid, groupId);
+    if (deleted) {
+      cout << "deleted group!" << endl;
+      bodyStream << "Successfully deleted group '" << groupName << "'";
+    } else {
+      cout << "delete group failed." << endl;
+      bodyStream << "Error: could not delete group '" << groupName << "'";
+    }
+
+    body = bodyStream.str();
+    
   } else if (uri.compare("/addToGroup") == 0 && uid != -1) {
     cout << "addToGroup" << endl;
+    // group-name=___added-name=___[admin=_]
     string params = (*reqHeaders)["params"];
     string groupName = params.substr(11, params.find("&") - 11);
     params = params.substr(params.find("&") + 1);
@@ -452,6 +470,49 @@ string handlePost(map<string, string>* reqHeaders) {
     bodyStream << "Successfully edited event.";
 
     body = bodyStream.str();
+
+  } else if (uri.compare("/addToEvent") == 0 && uid != -1) {
+    cout << "addToEvent" << endl;
+    // event-name=___added-name=___[admin=_]
+    string params = (*reqHeaders)["params"];
+    long eventId = stol(params.substr(11, params.find("&") - 11), nullptr);
+    params = params.substr(params.find("&") + 1);
+    string addedName = params.substr(11, params.find("&") - 11);
+    params = params.substr(params.find("&") + 1);
+    bool admin = params.find("admin") != string::npos;
+    long addedId = userIdByName(addedName);
+
+    stringstream bodyStream;
+    bool added = inviteToEvent(uid, addedId, eventId, admin);
+
+    if (added) {
+      cout << "added to event!" << endl;
+      bodyStream << "Successfully added '" << addedName << "' to event";
+    } else {
+      cout << "Error: could not add '" << addedName << "'.";
+      bodyStream << "Error: could not add '" << addedName << "' to event";
+    }
+
+    body = bodyStream.str();
+    
+  } else if (uri.compare("/deleteEvent") == 0 && uid != -1) {
+    cout << "deleteEvent" << endl;
+    string params = (*reqHeaders)["params"];
+    // event-id=__
+    long eventId = stol(params.substr(9), nullptr);
+
+    stringstream bodyStream;
+    bool deleted = deleteEvent(uid, eventId);
+    if (deleted) {
+      cout << "deleted event!" << endl;
+      bodyStream << "Successfully deleted event.";
+    } else {
+      cout << "delete event failed." << endl;
+      bodyStream << "Error: could not delete event.";
+    }
+
+    body = bodyStream.str();
+    
   } else {
     // 404
     cout << "error page" << endl;
