@@ -498,8 +498,8 @@ string handlePost(map<string, string>* reqHeaders) {
   } else if (uri.compare("/deleteEvent") == 0 && uid != -1) {
     cout << "deleteEvent" << endl;
     string params = (*reqHeaders)["params"];
-    // event-id=__
-    long eventId = stol(params.substr(9), nullptr);
+    // id=__
+    long eventId = stol(params.substr(3), nullptr);
 
     stringstream bodyStream;
     bool deleted = deleteEvent(uid, eventId);
