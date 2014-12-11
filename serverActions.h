@@ -91,6 +91,13 @@ void rescheduleEvent(const long userID, const long eventID, const time_t newTime
 bool inviteToEvent(const long inviterID, const long inviteeID, const long eventID,
 		   const bool canChange=false);
 
+/* Invite a group to an event. Might do nothing and return false if
+   the inviting group is not invited to the event, does not have write permissions,
+   or the event does not exist.
+   The canChange parameter specifies whether the invitee should be able to modify events in the group.*/
+bool inviteGroupToEvent(const long inviterID, const long inviteeID, const long eventID,
+		   const bool canChange=false);
+
 /* Delete a previously created event. Might do nothing and return false
    if the user trying to delete the event does not have write permissions,
    or was not invited to the event. */

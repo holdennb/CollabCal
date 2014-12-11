@@ -117,6 +117,7 @@ const string getFooter() {
   string editEvent   = "/editEvent";
   string createEvent = "/createEvent";
   string addToEvent  = "/addToEvent";
+  string addGroupToEvent = "/addGroupToEvent";
   string deleteEvent = "/deleteEvent";
 
   footer << "<div id='edit-event' class='form-div'>";
@@ -128,7 +129,17 @@ const string getFooter() {
   footer << "<input type='text' name='added-name' class='added-name' /><br />";
   footer << "<label>Make Admin of Event?</label><br />";
   footer << "<input type='checkbox' name='make-admin' class='make-admin' /><br />";
-  footer << "<input type='submit' value='Submit' class='submit' /><br />";
+  footer << "<input type='submit' value='Invite' class='submit' /><br />";
+  footer << "<span class='message'></span></form></div>";
+
+  footer << "<div class='add-group-to-event'><h3>Invite group to event</h3>";
+  footer << "<form action='" << addGroupToEvent << "' method='POST'>";
+  footer << "<input type='hidden' name='id' class='event-id' />";
+  footer << "<label>Username of User to Invite</label><br />";
+  footer << "<input type='text' name='added-name' class='added-name' /><br />";
+  footer << "<label>Make Admin of Group?</label><br />";
+  footer << "<input type='checkbox' name='make-admin' class='make-admin' /><br />";
+  footer << "<input type='submit' value='Invite' class='submit' /><br />";
   footer << "<span class='message'></span></form></div>";
 
   footer << "<div class='edit-event'><h3>Edit Event</h3>";
@@ -401,6 +412,23 @@ const string getExtras() {
     "});\n"
     "e.preventDefault();\n"
     "});\n"
+"$('#edit-event .add-group-to-event form').submit(function(e) {\n"
+    "var postData = $(this).serializeArray();\n"
+    "var formURL = $(this).attr('action');\n"
+    "$.ajax({\n"
+        "url : formURL,\n"
+        "type: 'POST',\n"
+        "data : postData,\n"
+        "contentType: 'text/plain',\n"
+        "success: function(data, textStatus, jqXHR) {\n"
+            "$('#edit-event .add-group-to-event form').find('.message').text(data);\n"
+        "},\n"
+        "error: function(jqXHR, textStatus, errorThrown) {\n"
+            "$('#edit-event .add-group-to-event form').find('.message').text(textStatus);\n"
+        "}\n"
+    "});\n"
+    "e.preventDefault();\n"
+    "});\n"
 "$('#create-event form').submit(function(e) {\n"
 	"var datetime = $(this).children('input.event-datetime').val();\n"
     "var dateAndTime = datetime.split(' ');\n"
@@ -546,9 +574,6 @@ const string getExtras() {
 	"border: 1px solid #ccc;"
 	"border-collapse: collapse;"
 "}"
-"table, td {"
-	"min-height: 556px;"
-"}"
 "th, td {"
 	"width: 14%;"
 "}"
@@ -559,6 +584,7 @@ const string getExtras() {
 "td.real-day {"
 	"border: 1px solid #999;"
 	"vertical-align: top;"
+        "height: 100px;"
 "}"
 "td.real-day .day-num {"
 	"font-size: 0.8em;"
@@ -594,7 +620,7 @@ const string getExtras() {
 ".form-div > div {"
         "display: inline-block;"
         "vertical-align: middle;"
-        "margin: 0px 30px;"
+        "margin: 0px 23px;"
 "}"
 "#edit-event {"
 	"display: none;"

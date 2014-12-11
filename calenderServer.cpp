@@ -496,6 +496,31 @@ string handlePost(map<string, string>* reqHeaders) {
 
     body = bodyStream.str();
     
+  } else if (uri.compare("/addGroupToEvent") == 0 && uid != -1) {
+    cout << "addGroupToEvent" << endl;
+    // id=___added-name=___[admin=_]
+    string params = (*reqHeaders)["params"];
+    long eventId = stol(params.substr(3, params.find("&") - 3), nullptr);
+    params = params.substr(params.find("&") + 1);
+    string addedName = params.substr(11, params.find("&") - 11);
+    params = params.substr(params.find("&") + 1);
+    bool admin = params.find("admin") != string::npos;
+    long addedId = groupIdByName(addedName);
+
+    stringstream bodyStream;
+    cerr << "user " << uid << " inviting group " << addedId << " to event " << eventId << ", admin=" << admin << endl;
+    bool added = inviteGroupToEvent(uid, addedId, eventId, admin);
+
+    if (added) {
+      cout << "added to event!" << endl;
+      bodyStream << "Successfully added '" << addedName << "' to event";
+    } else {
+      cout << "Error: could not add '" << addedName << "'." << endl;
+      bodyStream << "Error: could not add '" << addedName << "' to event";
+    }
+
+    body = bodyStream.str();
+    
   } else if (uri.compare("/deleteEvent") == 0 && uid != -1) {
     cout << "deleteEvent" << endl;
     string params = (*reqHeaders)["params"];
