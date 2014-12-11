@@ -8,6 +8,7 @@
 #include <cstdio>
 #include <algorithm>
 #include <stdexcept>
+#include <sstream>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <time.h>
@@ -88,7 +89,9 @@ bool deleteUser(const long userID){
 long makeGroup(const long userID, const string &groupName){
   Group newGroup(groupName, list<pair<long,bool> >(1,pair<long,bool>(userID, true)));
   long groupID = newGroup.getID();
-  string groupFilename = groupDir + groupName;
+  stringstream groupFilenameStream;
+  groupFilenameStream << groupDir << groupID;
+  string groupFilename = groupFilenameStream.str();
   replace(groupFilename.begin(), groupFilename.end(), ' ', '_');
   if(!newGroup.writeToFile(groupFilename)){
     cerr << "could not create group " << groupName << ": problem writing group file!" << endl;
@@ -151,7 +154,9 @@ bool deleteGroup(const long userID, const long groupID){
 long makeEvent(const long userID, const string &eventName, const time_t eventTime){
   Event newEvent(eventName, eventTime);
   long eventID = newEvent.getID();
-  string eventFilename = eventDir + eventName;
+  stringstream eventFilenameStream;
+  eventFilenameStream << eventDir << eventID;
+  string eventFilename = eventFilenameStream.str();
 
   replace(eventFilename.begin(), eventFilename.end(), ' ', '_');
   
