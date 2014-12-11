@@ -158,7 +158,7 @@ void handleClient(int clientSocket){
     try{
       response = handleRequest(request);
     } catch (exception e){
-      cerr << "got an exception, killing client thread..." << endl;
+      cerr << "got exception '" << e.what() << "', killing client thread..." << endl;
       return;
     }
 

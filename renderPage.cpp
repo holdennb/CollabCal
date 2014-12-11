@@ -116,9 +116,22 @@ const string getFooter() {
   stringstream footer;
   string editEvent   = "/editEvent";
   string createEvent = "/createEvent";
+  string addToEvent  = "/addToEvent";
+  string deleteEvent = "/deleteEvent";
 
   footer << "<div id='edit-event' class='form-div'>";
-  footer << "<h3>Edit Event</h3>";
+
+  footer << "<div class='add-to-event'><h3>Invite user to event</h3>";
+  footer << "<form action='" << addToEvent << "' method='POST'>";
+  footer << "<input type='hidden' name='id' class='event-id' />";
+  footer << "<label>Username of User to Invite</label><br />";
+  footer << "<input type='text' name='added-name' class='added-name' /><br />";
+  footer << "<label>Make Admin of Event?</label><br />";
+  footer << "<input type='checkbox' name='make-admin' class='make-admin' /><br />";
+  footer << "<input type='submit' value='Submit' class='submit' /><br />";
+  footer << "<span class='message'></span></form></div>";
+
+  footer << "<div class='edit-event'><h3>Edit Event</h3>";
   footer << "<form action='" << editEvent << "' method='POST'>";
   footer << "<div class='modified'>Warning: This event has been modified</div>";
   footer << "<input type='hidden' name='id' class='event-id' />";
@@ -129,6 +142,13 @@ const string getFooter() {
   footer << "<input type='hidden' name='datetime' class='timestamp'/><br />";
   footer << "<input type='submit' value='Submit' class='submit' /><br />";
   footer << "<span class='message'></span></form></div>";
+
+  footer << "<div class='delete-event'><h3>Delete Event</h3>";
+  footer << "<form action='" << deleteEvent << "' method='POST'>";
+  footer << "<input type='hidden' name='id' class='event-id' />";
+  footer << "<input type='submit' value='Delete' class='submit' /><br />";
+  footer << "<span class='message'></span></form></div></div>";
+
   footer << "<div id='create-event' class='form-div'>";
   footer << "<h3>Create New Event</h3>";
   footer << "<form action='" << createEvent << "' method='POST'>";
@@ -177,7 +197,7 @@ const string getHeader(const string &username) {
   header << "<input type='text' name='group-name' class='group-name' /><br />";
   header << "<label>Username of User to Add</label><br />";
   header << "<input type='text' name='added-name' class='added-name' /><br />";
-  header << "<label>Make Admin?</label><br />";
+  header << "<label>Make Admin of Group?</label><br />";
   header << "<input type='checkbox' name='make-admin' class='make-admin' /><br />";
   header << "<input type='submit' value='Add' class='submit' /><br />";
   header << "<span class='message'></span>";
@@ -255,18 +275,18 @@ const string getExtras() {
 "console.log('event clicked');\n"
 "$('#table-div .event').removeClass('active');\n"
 "$(this).addClass('active');\n"
-"$('#edit-event .modified').hide();\n"
-"$('#edit-event .message').text('');\n"
-"$('#edit-event input.event-name').val($(this).find('.name').text());\n"
+"$('#edit-event .edit-event .modified').hide();\n"
+"$('#edit-event .edit-event .message').text('');\n"
+"$('#edit-event .edit-event input.event-name').val($(this).find('.name').text());\n"
 "var month = $('#month').attr('data-value');\n"
 "var day = $(this).parent().find('.day-num').text();\n"
 "var time = $(this).find('.time').text();\n"
 "var hour = time.substring(0, time.indexOf(':'));\n"
-"$('#edit-event input.event-datetime')\n"
+"$('#edit-event .edit-event input.event-datetime')\n"
 ".val($('#year').text() + '-' + (month < 10 ? '0' + month : month)\n"
 "+ '-' + (day < 10 ? '0' + day : day)\n"
 "+ ' ' + (hour < 10 ? '0' + time : time));\n"
-"$('#edit-event input.event-id').val($(this).attr('data-value'));\n"
+"$('#edit-event .edit-event input.event-id').val($(this).attr('data-value'));\n"
 "$('#edit-event').show();\n"
 "});\n"
 "$('.logout').click(function() {\n"
@@ -309,7 +329,7 @@ const string getExtras() {
     "});\n"
     "e.preventDefault();\n"
     "});\n"
-"$('#edit-event form').submit(function(e) {\n"
+"$('#edit-event .edit-event form').submit(function(e) {\n"
 "var datetime = $(this).children('input.event-datetime').val();\n"
     "var dateAndTime = datetime.split(' ');\n"
     "var dateParts = dateAndTime[0].split('-');\n"
@@ -325,12 +345,48 @@ const string getExtras() {
         "data : postData,\n"
         "contentType: 'text/plain',\n"
         "success: function(data, textStatus, jqXHR) {\n"
-            "$('#edit-event form').find('.message').text(data);\n"
+            "$('#edit-event .edit-event form').find('.message').text(data);\n"
     "$('.event').removeClass('active');\n"
     "$('#edit-event').hide();\n"
         "},\n"
         "error: function(jqXHR, textStatus, errorThrown) {\n"
-            "$('#edit-event form').find('.message').text(textStatus);\n"
+            "$('#edit-event .edit-event form').find('.message').text(textStatus);\n"
+        "}\n"
+    "});\n"
+    "e.preventDefault();\n"
+    "});\n"
+"$('#edit-event .delete-event form').submit(function(e) {\n"
+    "var postData = $(this).serializeArray();\n"
+    "var formURL = $(this).attr('action');\n"
+    "$.ajax({\n"
+        "url : formURL,\n"
+        "type: 'POST',\n"
+        "data : postData,\n"
+        "contentType: 'text/plain',\n"
+        "success: function(data, textStatus, jqXHR) {\n"
+            "$('#edit-event .delete-event form').find('.message').text(data);\n"
+    "$('.event').removeClass('active');\n"
+    "$('#edit-event').hide();\n"
+        "},\n"
+        "error: function(jqXHR, textStatus, errorThrown) {\n"
+            "$('#edit-event .delete-event form').find('.message').text(textStatus);\n"
+        "}\n"
+    "});\n"
+    "e.preventDefault();\n"
+    "});\n"
+"$('#edit-event .add-to-event form').submit(function(e) {\n"
+    "var postData = $(this).serializeArray();\n"
+    "var formURL = $(this).attr('action');\n"
+    "$.ajax({\n"
+        "url : formURL,\n"
+        "type: 'POST',\n"
+        "data : postData,\n"
+        "contentType: 'text/plain',\n"
+        "success: function(data, textStatus, jqXHR) {\n"
+            "$('#edit-event .add-to-event form').find('.message').text(data);\n"
+        "},\n"
+        "error: function(jqXHR, textStatus, errorThrown) {\n"
+            "$('#edit-event .add-to-event form').find('.message').text(textStatus);\n"
         "}\n"
     "});\n"
     "e.preventDefault();\n"
@@ -516,7 +572,7 @@ const string getExtras() {
 	"text-align: center;"
 	"margin: 30px auto;"
 	"border: 1px solid #333;"
-	"padding: 20px;"
+	"padding: 10px;"
 	"clear: both;"
         "overflow: hidden;"
 "}"
