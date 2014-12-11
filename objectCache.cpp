@@ -162,27 +162,27 @@ lockptr<Event> acquireEvent(const long eventID){
 void dumpCache(){
   for_each(userCache.begin(), userCache.end(),
 	   [](pair<long, cacheRecord<User>* > entry){
-	     if (entry.second == nullptr) continue;
-	     if (entry.second->item == nullptr) continue;
-	     entry.second->item->writeToFile(userFileMap[entry.first]);
-	     delete entry.second->item;
-	     delete entry.second;
+	     if (entry.second != nullptr && entry.second->item != nullptr) {
+	       entry.second->item->writeToFile(userFileMap[entry.first]);
+	       delete entry.second->item;
+	       delete entry.second;
+	     }
 	   });
   for_each(groupCache.begin(), groupCache.end(),
 	   [](pair<long, cacheRecord<Group>* > entry){
-	     if (entry.second == nullptr) continue;
-	     if (entry.second->item == nullptr) continue;
-	     entry.second->item->writeToFile(groupFileMap[entry.first]);
-	     delete entry.second->item;
-	     delete entry.second;
+	     if (entry.second != nullptr && entry.second->item != nullptr) {
+	       entry.second->item->writeToFile(groupFileMap[entry.first]);
+	       delete entry.second->item;
+	       delete entry.second;
+	     }
 	   });
   for_each(eventCache.begin(), eventCache.end(),
 	   [](pair<long, cacheRecord<Event>* > entry){
-	     if (entry.second == nullptr) continue;
-	     if (entry.second->item == nullptr) continue;
-	     entry.second->item->writeToFile(eventFileMap[entry.first]);
-	     delete entry.second->item;
-	     delete entry.second;
+	     if (entry.second != nullptr && entry.second->item != nullptr) {
+	       entry.second->item->writeToFile(eventFileMap[entry.first]);
+	       delete entry.second->item;
+	       delete entry.second;
+	     }
 	   });
 }
 
