@@ -213,13 +213,19 @@ bool inviteToEvent(const long inviterID, const long inviteeID, const long eventI
   // We do this to prevent deadlocks if one thread has A trying to
   // invite B while another has B trying to invite A.
   if (inviterID < inviteeID){
+    cerr << "about to acquire users" << endl;
     auto inviter = acquireUser(inviterID);
     auto invitee = acquireUser(inviteeID);
 
-    if (inviter.isNull() || !inviter->canWrite(eventID))
+    if (inviter.isNull() || !inviter->canWrite(eventID)) {
+      cerr << "inviter.isNull is " << inviter.isNull() << " canwrite is " << inviter->canWrite(eventID) << endl;
       return false;
-    if (invitee.isNull())
+    }
+    if (invitee.isNull()) {
+      cerr << "invitee's null" << endl;
       return false;
+    }    
+    cerr << "about to call addEvent with " << eventID << ", " << canChange << endl;
     invitee->addEvent(eventID, canChange);
     return true;
 
