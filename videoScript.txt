@@ -1,8 +1,8 @@
-1. Create a user in window 1
-2. Create an event as that user
-3. Login as existing user in window 2
-4. Create group in window 2
-5. Invite other user to group
-6. Invite group to new event, as admins.
-7. Invite group to existing event, non-admins.
-8. Edit created event in window 1.
+1. Create a james in window 1
+2. Create "making video" event as that user
+3. Login as holdenb in window 2
+4. Create "frisbeeteam" group in window 2
+5. Invite james to frisbeeteam
+6. Create event "practice" with frisbeeteam initially invited.
+7. Invite frisbeeteam to XMAS, non-admins.
+8. Edit "practice" as james
