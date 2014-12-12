@@ -248,6 +248,17 @@ bool inviteToEvent(const long inviterID, const long inviteeID, const long eventI
   }
 
 }
+bool inviteGroupToEvent(const long inviterID, const long groupID, const long eventID, const bool canChange){
+  auto targetGroup = acquireGroup(groupID);
+  list<long>* groupUsers = targetGroup.getUserIDs();
+  bool success = true;
+  for(auto userID : groupUsers){
+    if(!inviteToEvent(inviterID, userID, eventID, canChange))
+      success = false;
+  }
+  delete groupUsers;
+  return success;
+}
 
 bool deleteEvent(const long userID, const long eventID){
   auto event = acquireEvent(eventID);
