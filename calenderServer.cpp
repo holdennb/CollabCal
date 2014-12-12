@@ -236,17 +236,14 @@ string handleGet(map<string, string>* reqHeaders) {
   long uid = -1;
   string uri = (*reqHeaders)["uri"];
   string body;
-  cout << "started ID validatiaon." << endl;
   if (reqHeaders->count("Cookie") != 0) {
     string cookies = (*reqHeaders)["Cookie"];
-    cout << "cookies: " << cookies << endl;
     size_t firstEquals = cookies.find("sessionid=");
     size_t nextSemiColon = cookies.substr(firstEquals).find(";");
     if (nextSemiColon == string::npos)
       nextSemiColon = cookies.length() - firstEquals;
     if (firstEquals != string::npos){
       string sessionIdString = cookies.substr(firstEquals + 10, nextSemiColon - 10);
-      cout << sessionIdString << endl;
       sessionId = stoll(sessionIdString, nullptr);
       auto usersessionIt = sessionMap.find(sessionId);
       if (usersessionIt == sessionMap.end()){
@@ -256,7 +253,6 @@ string handleGet(map<string, string>* reqHeaders) {
 	uid = usersessionIt->second;
     }
   }
-  cout << "finished ID validation. " << endl;
   map<string, string> resHeaders;
   resHeaders["Server"] = "CSE461";
   resHeaders["Content-Type"] = "text/html; charset=UTF-8";
