@@ -172,20 +172,22 @@ long makeEvent(const long userID, const string &eventName, const time_t eventTim
   return eventID;
 }
 
-void renameEvent(const long userID, const long eventID, const std::string &newName){
+bool renameEvent(const long userID, const long eventID, const std::string &newName){
   auto event = acquireEvent(eventID);
   auto user = acquireUser(userID);
   if (event.isNull() || user.isNull() || !user->canWrite(eventID))
-    return;
+    return false;
   event->rename(newName);
+  return true;
 }
 
-void rescheduleEvent(const long userID, const long eventID, const time_t newTime){
+bool rescheduleEvent(const long userID, const long eventID, const time_t newTime){
   auto event = acquireEvent(eventID);
   auto user = acquireUser(userID);
   if (event.isNull() || user.isNull() || !user->canWrite(eventID))
-    return;
+    return false;
   event->reschedule(newTime);
+  return true;
 }
 
 long makeEvent(const long userID, const string &eventName, const time_t eventTime, const long groupID,

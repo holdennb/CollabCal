@@ -77,11 +77,11 @@ long makeEvent(const long userID, const std::string &eventName, const time_t eve
 long makeEvent(const long userID, const std::string &eventName, const time_t eventTime, const long groupID,
 	       bool groupWritable=false);
 
-/* Change the name of an event. */
-void renameEvent(const long userID, const long eventID, const std::string &newName);
+/* Change the name of an event. Returns true on success.*/
+bool renameEvent(const long userID, const long eventID, const std::string &newName);
 
-/* Change the time of an event. */
-void rescheduleEvent(const long userID, const long eventID, const time_t newTime);
+/* Change the time of an event. Returns true on success.*/
+bool rescheduleEvent(const long userID, const long eventID, const time_t newTime);
 
 /* Invite another user to an event. Might do nothing and return false if
    the inviting user is not invited to the event, does not have write permissions,

@@ -478,12 +478,15 @@ string handlePost(map<string, string>* reqHeaders) {
     timeStream << timeString;
     timeStream >> eventTime;
 
-    renameEvent(uid, eventId, eventName);
-    rescheduleEvent(uid, eventId, eventTime);
 
     stringstream bodyStream;
-    cout << "edited event!" << endl;
-    bodyStream << "Successfully edited event.";
+    if (!renameEvent(uid, eventId, eventName) || !rescheduleEvent(uid, eventId, eventTime)){
+      cout << "couldn't edit event." << endl;
+      bodyStream << "Could not edit event. You're not an admin!";
+    } else {
+      cout << "edited event!" << endl;
+      bodyStream << "Successfully edited event.";
+    }
 
     body = bodyStream.str();
 
