@@ -400,6 +400,7 @@ string handlePost(map<string, string>* reqHeaders) {
     // group-name=___added-name=___[admin=_]
     string params = (*reqHeaders)["params"];
     string groupName = params.substr(11, params.find("&") - 11);
+    replace(groupName.begin(), groupName.end(), '+', ' ');
     params = params.substr(params.find("&") + 1);
     string addedName = params.substr(11, params.find("&") - 11);
     params = params.substr(params.find("&") + 1);
@@ -440,6 +441,7 @@ string handlePost(map<string, string>* reqHeaders) {
     long eventId;
     if (withGroup) {
       string groupName = params.substr(11);
+      replace(groupName.begin(), groupName.end(), '+', ' ');
       long groupId = groupIdByName(groupName);
       cout << "gName: " << groupName << " gID: " << groupId << endl;
 
@@ -465,6 +467,7 @@ string handlePost(map<string, string>* reqHeaders) {
     long eventId = stol(params.substr(3, params.find("&") - 3), nullptr);
     params = params.substr(params.find("&") + 1);
     string eventName = params.substr(5, params.find("&") - 5);
+    replace(eventName.begin(), eventName.end(), '+', ' ');
     params = params.substr(params.find("&") + 1);
     string timeString = params.substr(9, params.find("&") - 9);
 
@@ -516,6 +519,7 @@ string handlePost(map<string, string>* reqHeaders) {
     long eventId = stol(params.substr(3, params.find("&") - 3), nullptr);
     params = params.substr(params.find("&") + 1);
     string addedName = params.substr(11, params.find("&") - 11);
+    replace(addedName.begin(), addedName.end(), '+', ' ');
     params = params.substr(params.find("&") + 1);
     bool admin = params.find("admin") != string::npos;
     long addedId = groupIdByName(addedName);
