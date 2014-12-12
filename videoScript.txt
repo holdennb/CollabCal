@@ -1,8 +1,10 @@
-1. Create a james in window 1
-2. Create "making video" event as that user
-3. Login as holdenb in window 2
-4. Create "frisbeeteam" group in window 2
-5. Invite james to frisbeeteam
-6. Create event "practice" with frisbeeteam initially invited.
-7. Invite frisbeeteam to XMAS, non-admins.
-8. Edit "practice" as james
+1. Introduction
+2. Create paul in window 1
+3. Create "video" event as paul, for NOW
+4. Login as holdenb in window 2
+5. Create "frisbee" group in window 2
+6. Invite paul to frisbee, and make him admin, since he's captain.
+7. Create event "practice" with frisbee initially invited.
+8. Invite frisbee to XMAS, non-admins.
+9. Edit "practice" as paul
+10. Try to edit XMAS, fail, since you don't have permissions.
