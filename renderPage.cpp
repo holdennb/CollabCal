@@ -432,6 +432,7 @@ const string getExtras() {
             "data: postData,\n"
             "contentType: 'text/plain',\n"
             "success: function(data, textStatus, jqXHR) {\n"
+                "console.log(data);\n"
                 "$('#edit-event .add-group-to-event form').find('.message').text(data);\n"
             "},\n"
             "error: function(jqXHR, textStatus, errorThrown) {\n"

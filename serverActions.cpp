@@ -220,7 +220,6 @@ bool inviteToEvent(const long inviterID, const long inviteeID, const long eventI
   // We do this to prevent deadlocks if one thread has A trying to
   // invite B while another has B trying to invite A.
   if (inviterID < inviteeID){
-    cerr << "about to acquire users" << endl;
     auto inviter = acquireUser(inviterID);
     auto invitee = acquireUser(inviteeID);
 
@@ -232,7 +231,6 @@ bool inviteToEvent(const long inviterID, const long inviteeID, const long eventI
       cerr << "invitee's null" << endl;
       return false;
     }    
-    cerr << "about to call addEvent with " << eventID << ", " << canChange << endl;
     invitee->addEvent(eventID, canChange);
     return true;
 
@@ -255,8 +253,9 @@ bool inviteGroupToEvent(const long inviterID, const long groupID, const long eve
   list<long>* groupUsers = targetGroup->getUserIDs();
   bool success = true;
   for(auto userID : *groupUsers){
-    if(!inviteToEvent(inviterID, userID, eventID, canChange))
-      success = false;
+    if (inviterID != userID && !inviteToEvent(inviterID, userID, eventID, canChange)) {
+	success = false;
+    }
   }
   delete groupUsers;
   return success;
