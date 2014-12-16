@@ -67,9 +67,9 @@ const string getEmptyCalendar() {
 
   // Calculate the length of the month
   int monthLength = 31;
-  if (monthNum == 4 || monthNum == 6 || monthNum == 9 || monthNum == 11) { 
+  if (monthNum == 3 || monthNum == 5 || monthNum == 8 || monthNum == 10) { 
     monthLength = 30;
-  } else if (monthNum == 2) {
+  } else if (monthNum == 1) {
     bool isLeapYear = (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
     monthLength = (isLeapYear ? 29 : 28);
   }
